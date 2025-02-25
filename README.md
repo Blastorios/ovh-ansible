@@ -1,77 +1,33 @@
-# An Ansible collection to talk with OVH API
+# Synthesio OVHCloud
+*An Ansible collection to talk with the OVH API.*
 
-## Requirements
-
-Tested with:
-
-- Python 3.9
-- [Python-ovh 1.0](https://github.com/ovh/python-ovh)
-- Ansible 2.12+
-- flake8
-
-## Collection
-
-This module can be [installed as a collection](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#installing-a-collection-from-a-git-repository)
-
+To install ([from git](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#installing-a-collection-from-a-git-repository)):
 ```shell
 ansible-galaxy collection install git+https://github.com/synthesio/infra-ovh-ansible-module
 ```
 
-This collection provides the following modules:
 
-```text
-dedicated_nasha_manage_partition
-dedicated_server_boot
-dedicated_server_boot_wait
-dedicated_server_compatible_templates
-dedicated_server_display_name
-dedicated_server_info
-dedicated_server_install
-dedicated_server_install_wait
-dedicated_server_intervention
-dedicated_server_monitoring
-dedicated_server_networkinterfacecontroller
-dedicated_server_rescuesshkey
-dedicated_server_terminate
-dedicated_server_vrack
-domain
-installation_template
-ip_info
-ip_move
-ip_reverse
-me_sshkey
-public_cloud_block_storage
-public_cloud_block_storage_instance
-public_cloud_flavorid_info
-public_cloud_imageid_info
-public_cloud_instance
-public_cloud_instance_delete
-public_cloud_instance_flavor_change
-public_cloud_instance_id
-public_cloud_instance_info
-public_cloud_instance_interface
-public_cloud_instance_shelving
-public_cloud_monthly_billing
-public_cloud_object_storage
-public_cloud_object_storage_policy
-public_cloud_private_network_info
-vps_display_name
-vps_info
-```
+## Requirements
 
-You can read the documentation of every modules with `ansible-doc synthesio.ovh.$modules`
+This collection has been tested with the following software:
 
-An example for a custom template to install a dedicated server is present in `roles/ovhtemplate` folder
+- Python 3.9
+- [Python-ovh 1.0](https://github.com/ovh/python-ovh)
+- Ansible 2.12+
+
+Additionally, you need the following from OVHCloud:
+
+- application key
+- application secret
+- consumer key
+
+Check the [`use-the-api-on-behalf-of-a-user`](https://github.com/ovh/python-ovh/blob/master/README.rst#use-the-api-on-behalf-of-a-user) for more details on how to get these secrets.
+
 
 ## Configuration
 
-The collection path must be defined in your `ansible.cfg` :
-
-```ini
-[defaults]
-collections_paths = collections/
-```
-
+Ensure the collection can be reached by your `ansible-playbook` or `ansible-navigator` command ([how to configure your collections path](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#collections-paths)).
+ 
 In `/etc/ovh.conf`:
 
 ```ini
@@ -101,13 +57,13 @@ Alternatively, you can provide credentials as module attributes:
 
 This allows you to store them in Ansible vault or to use any lookup plugin to retrieve them.
 
-## Usage
 
-Here are a few examples of what you can do. Please read the module for everything else, it most probably does it!
+## Examples
 
-As this is a collection now you must declare it in each task.
+There is also an example to install a custom template on a dedicated server inside the `roles/ovhtemplate` directory.
 
-A few examples:
+You can find additional examples in the provided documentation, using: `ansible-doc synthesio.ovh.$modules`.
+
 
 ### Add a host into the vrack
 
@@ -182,4 +138,47 @@ A few examples:
     flavor_id: "{{ flavor_id }}"
     region: "{{ region }}"
     image_id: "{{ image_id }}"
+```
+
+
+## Collection Content
+
+```text
+dedicated_nasha_manage_partition
+dedicated_server_boot
+dedicated_server_boot_wait
+dedicated_server_compatible_templates
+dedicated_server_display_name
+dedicated_server_info
+dedicated_server_install
+dedicated_server_install_wait
+dedicated_server_intervention
+dedicated_server_monitoring
+dedicated_server_networkinterfacecontroller
+dedicated_server_rescuesshkey
+dedicated_server_terminate
+dedicated_server_vrack
+domain
+installation_template
+ip_info
+ip_move
+ip_reverse
+me_sshkey
+public_cloud_block_storage
+public_cloud_block_storage_instance
+public_cloud_flavorid_info
+public_cloud_imageid_info
+public_cloud_instance
+public_cloud_instance_delete
+public_cloud_instance_flavor_change
+public_cloud_instance_id
+public_cloud_instance_info
+public_cloud_instance_interface
+public_cloud_instance_shelving
+public_cloud_monthly_billing
+public_cloud_object_storage
+public_cloud_object_storage_policy
+public_cloud_private_network_info
+vps_display_name
+vps_info
 ```
