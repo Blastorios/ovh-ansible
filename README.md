@@ -21,14 +21,15 @@ Additionally, you need the following from OVHCloud:
 - application secret
 - consumer key
 
-Check the [`use-the-api-on-behalf-of-a-user`](https://github.com/ovh/python-ovh/blob/master/README.rst#use-the-api-on-behalf-of-a-user) for more details on how to get these secrets.
+Check the [`use-the-api-on-behalf-of-a-user`](https://github.com/ovh/python-ovh/blob/master/README.rst#use-the-api-on-behalf-of-a-user) from the Python OVH repository for more details on how to get these secrets.
 
 
 ## Configuration
 
-Ensure the collection can be reached by your `ansible-playbook` or `ansible-navigator` command ([how to configure your collections path](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#collections-paths)).
- 
-In `/etc/ovh.conf`:
+Ensure the collection can be reached from your `ansible-playbook` or `ansible-navigator` command ([how to configure your collections path](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#collections-paths)).
+
+### Using the OVH secrets
+You can either paste the secrets in a `ovh.conf` file (in the `$CWD` or in `/etc/`):
 
 ```ini
 [default]
@@ -42,7 +43,7 @@ application_secret=<YOUR APPLICATIOM SECRET>
 consumer_key=<YOUR CONSUMER KEY>
 ```
 
-Alternatively, you can provide credentials as module attributes:
+Or, you can provide credentials as module attributes (this allows you to store them in Ansible vault or to use any lookup plugin to retrieve them):
 
 ```yaml
 - name: Add server to vrack
@@ -54,8 +55,6 @@ Alternatively, you can provide credentials as module attributes:
     vrack: "{{ vrackid }}"
     service_name: "{{ ovhname }}"
 ```
-
-This allows you to store them in Ansible vault or to use any lookup plugin to retrieve them.
 
 
 ## Examples
