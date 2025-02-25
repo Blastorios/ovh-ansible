@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: public_cloud_instance_info
 short_description: Retrieve all info for a OVH public cloud instance
@@ -24,45 +24,35 @@ options:
         required: true
         description: The instance uuid
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Retrieve all info for a OVH public cloud instance
   synthesio.ovh.public_cloud_instance_info:
     instance_id: "{{ instance_id }}"
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: instance_metadata
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
-        service_name=dict(required=True),
-        instance_id=dict(required=True)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+@collection_module(
+    dict(service_name=dict(required=True), instance_id=dict(required=True))
+)
+def main(module: AnsibleModule, client: OVH, service_name: str, instance_id: str):
+    result = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/instance/{instance_id}"
     )
-    client = OVH(module)
-
-    instance_id = module.params['instance_id']
-    service_name = module.params['service_name']
-    result = client.wrap_call("GET", f"/cloud/project/{service_name}/instance/{instance_id}")
 
     module.exit_json(changed=False, **result)
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

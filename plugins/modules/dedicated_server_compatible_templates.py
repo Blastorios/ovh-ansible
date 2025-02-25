@@ -50,18 +50,12 @@ compatible_templates:
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(service_name=dict(required=True)))
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-    service_name = module.params["service_name"]
-
+@collection_module(dict(service_name=dict(required=True)))
+def main(module: AnsibleModule, client: OVH, service_name: str):
     if module.check_mode:
         module.exit_json(
             msg=f"Retrieving templates for {service_name} - (dry run mode)",
@@ -73,10 +67,6 @@ def run_module():
     )
 
     module.exit_json(changed=False, compatible_templates=compatible_templates)
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

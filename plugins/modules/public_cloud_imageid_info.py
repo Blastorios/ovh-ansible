@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: public_cloud_imageid_info
 short_description: Get image id based on human name in ovh repository or in own snapshot repository
@@ -29,9 +29,9 @@ options:
         required: true
         description: The service_name
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Get image id
   synthesio.ovh.public_cloud_imageid_info:
     service_name: "{{ service_name }}"
@@ -39,51 +39,42 @@ EXAMPLES = r'''
     name: "Debian 10"
   delegate_to: localhost
   register: image_id
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+@collection_module(
+    dict(
         service_name=dict(required=True),
         name=dict(required=True),
-        region=dict(required=True)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        region=dict(required=True),
     )
-    client = OVH(module)
-
-    service_name = module.params['service_name']
-    name = module.params['name']
-    region = module.params['region']
-
+)
+def main(module: AnsibleModule, client: OVH, service_name: str, name: str, region: str):
     # Get images list
-    result_image = client.wrap_call("GET", f"/cloud/project/{service_name}/image",
-                                    region=region)
+    result_image = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/image", region=region
+    )
 
     # Get snapshot list
-    result_snapshot = client.wrap_call("GET", f"/cloud/project/{service_name}/snapshot",
-                                       region=region)
+    result_snapshot = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/snapshot", region=region
+    )
 
     # search in both list
-    for i in (result_image + result_snapshot):
-        if i['name'] == name:
-            image_id = i['id']
+    for i in result_image + result_snapshot:
+        if i["name"] == name:
+            image_id = i["id"]
             module.exit_json(changed=False, id=image_id)
 
     module.fail_json(msg="Image {} not found in {}".format(name, region), changed=False)
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

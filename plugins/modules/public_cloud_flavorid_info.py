@@ -45,28 +45,21 @@ RETURN = """ # """
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            name=dict(required=True),
-            region=dict(required=True),
-        )
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        name=dict(required=True),
+        region=dict(required=True),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    service_name = module.params["service_name"]
-    name = module.params["name"]
-    region = module.params["region"]
-
-    result = client.wrap_call("GET", f"/cloud/project/{service_name}/flavor", region=region)
+)
+def main(module: AnsibleModule, client: OVH, service_name: str, name: str, region: str):
+    result = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/flavor", region=region
+    )
     for f in result:
         if f["name"] == name:
             flavor_id = f["id"]
@@ -76,10 +69,6 @@ def run_module():
     module.fail_json(
         msg="Flavor {} not found in {}".format(name, region), changed=False
     )
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

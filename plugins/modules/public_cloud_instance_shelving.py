@@ -49,27 +49,24 @@ RETURN = """ # """
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            shelve_state=dict(required=True, choices=["shelved", "unshelved"]),
-            instance_id=dict(required=True),
-        )
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        shelve_state=dict(required=True, choices=["shelved", "unshelved"]),
+        instance_id=dict(required=True),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    service_name = module.params["service_name"]
-    shelve_state = module.params["shelve_state"]
-    instance_id = module.params["instance_id"]
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    shelve_state: str,
+    instance_id: str,
+):
     # Set the route depending on the action
     if shelve_state == "shelved":
         route = f"/cloud/project/{service_name}/instance/{instance_id}/shelve"
@@ -87,10 +84,6 @@ def run_module():
         result=message,
         changed=True,
     )
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

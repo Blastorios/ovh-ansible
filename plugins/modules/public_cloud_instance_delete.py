@@ -45,48 +45,35 @@ RETURN = """ # """
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            name=dict(required=True),
-            service_name=dict(required=True),
-            region=dict(required=True),
-        )
+@collection_module(
+    dict(
+        name=dict(required=True),
+        service_name=dict(required=True),
+        region=dict(required=True),
     )
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    name = module.params["name"]
-    service_name = module.params["service_name"]
-    region = module.params["region"]
-
+)
+def main(module: AnsibleModule, client: OVH, name: str, service_name: str, region: str):
     instances_list = client.wrap_call(
         "GET", f"/cloud/project/{service_name}/instance", region=region
     )
 
     for i in instances_list:
-
         if i["name"] == name:
             instance_id = i["id"]
             instance_details = client.wrap_call(
                 "GET", f"/cloud/project/{service_name}/instance/{instance_id}"
             )
             if instance_details["status"] == "ACTIVE":
-                module.fail_json(msg="Instance must not be active to be deleted", changed=False)
+                module.fail_json(
+                    msg="Instance must not be active to be deleted", changed=False
+                )
 
-    client.wrap_call(
-        "DELETE", f"/cloud/project/{service_name}/instance/{instance_id}"
-    )
+    client.wrap_call("DELETE", f"/cloud/project/{service_name}/instance/{instance_id}")
     module.exit_json(changed=True)
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

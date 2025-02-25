@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: dedicated_server_display_name
 short_description: Modify the server display name in ovh manager
@@ -24,61 +24,49 @@ options:
         required: true
         description: The display name to set
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: "Set display name to {{ display_name }} on server {{ ovhname }}"
   synthesio.ovh.dedicated_server_display_name:
     service_name: "{{ ovhname }}"
     display_name: "{{ display_name }}"
   delegate_to: localhost
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
-        display_name=dict(required=True),
-        service_name=dict(required=True)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
-    )
-    client = OVH(module)
-
-    display_name = module.params['display_name']
-    service_name = module.params['service_name']
-
+@collection_module(
+    dict(display_name=dict(required=True), service_name=dict(required=True))
+)
+def main(module: AnsibleModule, client: OVH, display_name: str, service_name: str):
     if module.check_mode:
-        module.exit_json(msg="display_name has been set to {} ! - (dry run mode)".format(display_name), changed=True)
+        module.exit_json(
+            msg="display_name has been set to {} ! - (dry run mode)".format(
+                display_name
+            ),
+            changed=True,
+        )
 
     result = client.wrap_call("GET", f"/dedicated/server/{service_name}/serviceInfos")
 
     service_id = result["serviceId"]
-    resource = {
-        "resource": {
-            'displayName': display_name,
-            'name': service_name}}
+    resource = {"resource": {"displayName": display_name, "name": service_name}}
 
-    client.wrap_call(
-        "PUT",
-        f"/service/{service_id}",
-        **resource
-    )
+    client.wrap_call("PUT", f"/service/{service_id}", **resource)
     module.exit_json(
-        msg="displayName succesfully set to {} for {} !".format(display_name, service_name),
-        changed=True)
+        msg="displayName succesfully set to {} for {} !".format(
+            display_name, service_name
+        ),
+        changed=True,
+    )
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -175,31 +175,21 @@ usbKeys:
             sample: GB
         value:
             description: Size value.
-            type: int"""
+            type: int
+"""
+
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(service_name=dict(required=True)))
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-
-    if module.check_mode:
-        module.exit_json(changed=False)
-
-    client = OVH(module)
-    service_name = module.params["service_name"]
+@collection_module(dict(service_name=dict(required=True)))
+def main(module: AnsibleModule, client: OVH, service_name: str):
     result = client.wrap_call(
         "GET", f"/dedicated/server/{service_name}/specifications/hardware"
     )
     module.exit_json(changed=False, **result)
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":
