@@ -3,17 +3,17 @@
 
 from __future__ import absolute_import, division, print_function
 
-from ansible.module_utils.basic import AnsibleModule
-
 __metaclass__ = type
+
+from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
-module: vps_info
-short_description: Retrieve all info for a OVH vps
+module: vps_reboot
+short_description: Reboot a VPS
 description:
-    - This module retrieves all info for a OVH vps
-author: Maxime Dupré / Paul Tap (armorica)
+    - Reboot a VPS
+author: Blastorios
 requirements:
     - ovh >= 0.5.0
 options:
@@ -23,10 +23,9 @@ options:
 """
 
 EXAMPLES = r"""
-- name: Retrieve all info for an OVH vps
-  synthesio.ovh.vps_info:
+- name: Retrieve the automated backup settings for an OVH vps
+  synthesio.ovh.vps_reboot:
     service_name: "{{ service_name }}"
-  register: vps_info
 """
 
 RETURN = """ # """
@@ -39,7 +38,7 @@ from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
 
 @collection_module(dict(service_name=dict(required=True)))
 def main(module: AnsibleModule, client: OVH, service_name: str):
-    result = client.wrap_call("GET", f"/vps/{service_name}")
+    result: dict = client.wrap_call("POST", f"/vps/{service_name}/reboot")
 
     module.exit_json(changed=False, **result)
 
