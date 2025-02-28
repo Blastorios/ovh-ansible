@@ -20,7 +20,7 @@ options:
 """
 EXAMPLES = r"""
 - name: Retrieve IP specifications for an OVH dedicated server
-  synthesio.ovh.dedicated_server_ip_info:
+  blastorios.ovh.dedicated_server_ip_info:
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: ip_info
@@ -88,7 +88,7 @@ ipv6:
             choices: [failover, static, unshielded]
 """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

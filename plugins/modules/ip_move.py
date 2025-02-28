@@ -27,7 +27,7 @@ options:
 
 EXAMPLES = r"""
 - name: Modify reverse on IP
-  synthesio.ovh.ip_move:
+  blastorios.ovh.ip_move:
     ip: 192.0.2.1
     service_name: "nsXXXXX.ip-YY-YYY-YYY.net"
   delegate_to: localhost
@@ -35,7 +35,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

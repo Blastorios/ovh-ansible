@@ -30,7 +30,7 @@ options:
 
 EXAMPLES = r"""
 - name: Manage installation templates for dedicated servers
-  synthesio.ovh.installation_template:
+  blastorios.ovh.installation_template:
     template: "custom-debian-raid10-soft"
     state: "present"
   delegate_to: localhost
@@ -44,11 +44,11 @@ import ast
 
 from typing import Optional
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
 )
 

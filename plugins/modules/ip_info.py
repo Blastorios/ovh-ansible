@@ -24,7 +24,7 @@ options:
 
 EXAMPLES = r"""
 - name: Get IP details
-  synthesio.ovh.ip_info:
+  blastorios.ovh.ip_info:
     ip: "192.0.2.1"
   register: ip_info
   delegate_to: localhost
@@ -38,7 +38,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

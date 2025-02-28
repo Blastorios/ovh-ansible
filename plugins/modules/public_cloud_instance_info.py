@@ -28,7 +28,7 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve all info for a OVH public cloud instance
-  synthesio.ovh.public_cloud_instance_info:
+  blastorios.ovh.public_cloud_instance_info:
     instance_id: "{{ instance_id }}"
     service_name: "{{ service_name }}"
   delegate_to: localhost
@@ -37,7 +37,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

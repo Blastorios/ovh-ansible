@@ -28,7 +28,7 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve the mac addresses of the dedicated server
-  synthesio.ovh.dedicated_server_networkinterfacecontroller:
+  blastorios.ovh.dedicated_server_networkinterfacecontroller:
     link_type: "private"
     service_name: "{{ service_name }}"
   delegate_to: localhost
@@ -37,7 +37,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

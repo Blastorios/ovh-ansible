@@ -34,7 +34,7 @@ options:
 
 EXAMPLES = r"""
 - name: Wait until the dedicated server hard reboot is done
-  synthesio.ovh.dedicated_server_boot_wait:
+  blastorios.ovh.dedicated_server_boot_wait:
     service_name: "ns12345.ip-1-2-3.eu"
     max_retry: "240"
     sleep: "10"
@@ -45,7 +45,7 @@ RETURN = """ # """
 
 import time
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

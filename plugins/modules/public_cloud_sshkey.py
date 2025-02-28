@@ -37,7 +37,7 @@ options:
 
 EXAMPLES = r"""
 - name: "Create a new ssh key on public cloud OVH"
-  synthesio.ovh.public_cloud_sshkey:
+  blastorios.ovh.public_cloud_sshkey:
     name: "{{ sshkey_name }}"
     public_cloud_ssh_key: "{{ sshkey_key }}"
     service_name: "{{ service_name }}"
@@ -51,7 +51,7 @@ RETURN = """ # """
 
 from typing import Optional
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

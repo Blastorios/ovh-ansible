@@ -32,7 +32,7 @@ options:
 
 EXAMPLES = r"""
 - name: Get the id of a OVH public cloud instance
-  synthesio.ovh.public_cloud_instance_info:
+  blastorios.ovh.public_cloud_instance_info:
     instance_name: "{{ instance_id }}"
     service_name: "{{ service_name }}"
     region: "{{ region }}"
@@ -47,7 +47,7 @@ id:
     sample: kai1hei3-2aku-cz2h-pkc9-aapo1jeigh9e
 """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     ovh_argument_spec,
 )
@@ -87,7 +87,6 @@ def main():
         )
 
     module.exit_json(id=instance_id, changed=False)
-
 
 
 if __name__ == "__main__":

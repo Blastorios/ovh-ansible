@@ -33,7 +33,7 @@ options:
 
 EXAMPLES = r"""
 - name: Get image id
-  synthesio.ovh.public_cloud_imageid_info:
+  blastorios.ovh.public_cloud_imageid_info:
     service_name: "{{ service_name }}"
     region: "GRA7"
     name: "Debian 10"
@@ -43,7 +43,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

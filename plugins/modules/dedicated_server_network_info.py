@@ -20,7 +20,7 @@ options:
 """
 EXAMPLES = r"""
 - name: Retrieve network specifications for an OVH dedicated server
-  synthesio.ovh.dedicated_server_network_info:
+  blastorios.ovh.dedicated_server_network_info:
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: network_info
@@ -236,7 +236,7 @@ vrack:
             sample: standard
 """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

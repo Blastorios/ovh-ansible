@@ -30,7 +30,7 @@ options:
 
 EXAMPLES = r"""
 - name: Get id for a flavor
-  synthesio.ovh.public_cloud_flavorid_info:
+  blastorios.ovh.public_cloud_flavorid_info:
     service_name: "{{ service_name }}"
     region: "GRA-7"
     name: "t1-45"
@@ -38,7 +38,7 @@ EXAMPLES = r"""
   register: flavor_infos
 
 - name: Change flavor for an instance
-  synthesio.ovh.public_cloud_instance_flavor_change:
+  blastorios.ovh.public_cloud_instance_flavor_change:
     instance_id: "{{ instance_id }}"
     service_name: "{{ service_name }}"
     flavor_id: "{{ flavor_infos.id }}"
@@ -48,7 +48,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     ovh_argument_spec,
 )
@@ -82,7 +82,6 @@ def main():
         msg=f"Instance {instance_id} resized to {flavor_id}. This might take a couple of minutes.",
         changed=True,
     )
-
 
 
 if __name__ == "__main__":

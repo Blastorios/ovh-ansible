@@ -27,7 +27,7 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve the automated backup settings for an OVH vps
-  synthesio.ovh.vps_create_snapshot:
+  blastorios.ovh.vps_create_snapshot:
     service_name: "{{ service_name }}"
     description: Quickly saving before I do something weird
 """
@@ -36,7 +36,7 @@ RETURN = """ # """
 
 from typing import Optional
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

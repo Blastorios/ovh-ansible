@@ -40,7 +40,7 @@ options:
 
 EXAMPLES = r"""
 - name: Install a new dedicated server
-  synthesio.ovh.dedicated_server_install:
+  blastorios.ovh.dedicated_server_install:
     service_name: "ns12345.ip-1-2-3.eu"
     hostname: "server01.example.net"
     template: "debian10_64"
@@ -57,11 +57,11 @@ RETURN = """ # """
 
 from typing import Optional, List
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StateEnabledDisabled,
 )
 

@@ -144,7 +144,7 @@ def collection_module(parameters: Dict, **kwargs):
     Example
     -------
     ```python
-    from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         OVH,
         collection_module,
     )

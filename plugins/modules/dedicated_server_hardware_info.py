@@ -20,7 +20,7 @@ options:
 """
 EXAMPLES = r"""
 - name: Retrieve hardware specifications for an OVH dedicated server
-  synthesio.ovh.dedicated_server_hardware_info:
+  blastorios.ovh.dedicated_server_hardware_info:
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: hardware_info
@@ -178,7 +178,7 @@ usbKeys:
             type: int
 """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

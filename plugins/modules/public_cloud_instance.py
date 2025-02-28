@@ -62,7 +62,7 @@ options:
 
 EXAMPLES = r"""
 - name: "Launch install of {{ inventory_hostname }} on public cloud OVH"
-  synthesio.ovh.public_cloud_instance:
+  blastorios.ovh.public_cloud_instance:
     name: "{{ inventory_hostname }}"
     ssh_key_id: "{{ sshKeyId }}"
     service_name: "{{ service_name }}"
@@ -78,7 +78,7 @@ RETURN = """ # """
 
 from typing import Optional, List
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

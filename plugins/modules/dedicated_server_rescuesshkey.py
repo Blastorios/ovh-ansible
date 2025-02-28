@@ -28,7 +28,7 @@ options:
 
 EXAMPLES = r"""
 - name: "Set the ssh key for access in rescue mode {{ service_name }}"
-  synthesio.ovh.dedicated_server_rescuesshkey:
+  blastorios.ovh.dedicated_server_rescuesshkey:
     service_name: "{{ service_name }}"
     ssh_key: "ssh-ed25519 [....]"
   delegate_to: localhost
@@ -36,7 +36,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

@@ -24,7 +24,7 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve basic info for an OVH dedicated server
-  synthesio.ovh.dedicated_server_info:
+  blastorios.ovh.dedicated_server_info:
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: dedicated_info
@@ -32,7 +32,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

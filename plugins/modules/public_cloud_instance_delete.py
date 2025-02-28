@@ -34,7 +34,7 @@ options:
 
 EXAMPLES = """
 - name: "Delete instance of {{ inventory_hostname }} on public cloud OVH"
-  synthesio.ovh.public_cloud_instance_delete:
+  blastorios.ovh.public_cloud_instance_delete:
     name: "{{ inventory_hostname }}"
     service_name: "{{ service_name }}"
     region: "{{ region }}"
@@ -43,7 +43,7 @@ EXAMPLES = """
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

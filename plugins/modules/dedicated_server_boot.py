@@ -39,7 +39,7 @@ choices: ['harddisk','rescue-customer','ipxe-shell','poweroff']
 
 EXAMPLES = r"""
 - name: Change the bootid of a dedicated server to rescue
-  synthesio.ovh.dedicated_server_boot:
+  blastorios.ovh.dedicated_server_boot:
     service_name: "{{ service_name }}"
     boot: "rescue-customer"
     force_reboot: "true"
@@ -48,11 +48,11 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     OVHBootType,
 )
 

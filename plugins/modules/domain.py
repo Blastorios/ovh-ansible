@@ -48,7 +48,7 @@ options:
 
 EXAMPLES = r"""
 - name: Ensure entry is in dns
-  synthesio.ovh.domain:
+  blastorios.ovh.domain:
     domain: example.com
     value: "192.2.0.1"
     name: "www"
@@ -60,11 +60,11 @@ RETURN = """ # """
 
 from typing import List
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
     OVHRecordType,
 )

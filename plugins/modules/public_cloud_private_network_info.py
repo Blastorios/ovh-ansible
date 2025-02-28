@@ -33,7 +33,7 @@ options:
 
 EXAMPLES = r"""
   - name: Get the openstack id for the private network in the region
-  synthesio.ovh.public_cloud_private_network_info:
+  blastorios.ovh.public_cloud_private_network_info:
     service_name: "{{ service_name }}"
     private_network: "{{ network }}"
     region: "GRA11"
@@ -50,7 +50,7 @@ openstack_id:
     sample: 54e97ee2-407c-4dbc-a833-39d2910514d4
 # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

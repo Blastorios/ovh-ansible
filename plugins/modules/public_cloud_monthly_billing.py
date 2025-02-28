@@ -28,7 +28,7 @@ options:
 
 EXAMPLES = r"""
 - name: Enable monthly billing
-  synthesio.ovh.public_cloud_monthly_billing:
+  blastorios.ovh.public_cloud_monthly_billing:
     service_name: "{{ service_name }}"
     instance_id: "{{ instance_id }}"
   delegate_to: localhost
@@ -36,7 +36,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

@@ -35,7 +35,7 @@ options:
 
 EXAMPLES = r"""
 - name: Change the vrack of a dedicated server
-  synthesio.ovh.dedicated_server_vrack
+  blastorios.ovh.dedicated_server_vrack
     service_name: {{ service_name }}
     vrack: "{{ vrack }}"
   delegate_to: localhost
@@ -43,11 +43,11 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
 )
 

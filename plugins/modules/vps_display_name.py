@@ -28,7 +28,7 @@ options:
 
 EXAMPLES = r"""
 - name: "Set display name to {{ display_name }} on vps {{ ovhname }}"
-  synthesio.ovh.vps_display_name:
+  blastorios.ovh.vps_display_name:
     service_name: "{{ ovhname }}"
     display_name: "{{ display_name }}"
   delegate_to: localhost
@@ -36,7 +36,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

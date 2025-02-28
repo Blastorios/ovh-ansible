@@ -43,7 +43,7 @@ options:
 
 EXAMPLES = r"""
   - name: Create vrack interface
-  synthesio.ovh.public_cloud_instance_interface:
+  blastorios.ovh.public_cloud_instance_interface:
     service_name: "{{ service_name }}"
     instance_id: "{{ instance_id }}"
     interface_ip: "{{ network_vrack.ip }}"
@@ -55,11 +55,11 @@ EXAMPLES = r"""
 
 RETURN = r""" # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
 )
 

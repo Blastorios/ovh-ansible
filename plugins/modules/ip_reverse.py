@@ -32,7 +32,7 @@ options:
 
 EXAMPLES = r"""
 - name: Modify reverse on IP
-  synthesio.ovh.ip_reverse:
+  blastorios.ovh.ip_reverse:
     ip: 192.0.2.1
     reverse: host.domain.example.
   delegate_to: localhost
@@ -43,7 +43,7 @@ RETURN = """ # """
 from typing import Optional
 import urllib.parse
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     ResourceNotFound,
     collection_module,

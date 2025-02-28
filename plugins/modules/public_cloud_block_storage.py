@@ -56,7 +56,7 @@ options:
 
 EXAMPLES = r"""
 - name: Ensure Volume is state wanted
-  synthesio.ovh.public_cloud_block_storage:
+  blastorios.ovh.public_cloud_block_storage:
     service_name: "{{ service_name }}"
     region: "{{ region }}"
     size: "{{ size }}"
@@ -71,11 +71,11 @@ RETURN = r""" # """
 
 from typing import Optional
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
     OVHVolumeType,
 )

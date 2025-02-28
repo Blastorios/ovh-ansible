@@ -31,7 +31,7 @@ options:
 
 EXAMPLES = r"""
 - name: "Enable proactive intervention on dedicated server {{ service_name }}"
-  synthesio.ovh.dedicated_server_intervention:
+  blastorios.ovh.dedicated_server_intervention:
     service_name: "{{ service_name }}"
     state: enabled
   delegate_to: localhost
@@ -39,11 +39,11 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StateEnabledDisabled,
 )
 

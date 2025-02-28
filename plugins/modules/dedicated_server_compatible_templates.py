@@ -24,7 +24,7 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve all compatible templates for an OVH dedicated server
-  synthesio.ovh.dedicated_server_compatible_templates:
+  blastorios.ovh.dedicated_server_compatible_templates:
     service_name: "{{ service_name }}"
   delegate_to: localhost
   register: dedicated_templates
@@ -48,7 +48,7 @@ compatible_templates:
     }
 """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

@@ -65,7 +65,7 @@ options:
 
 EXAMPLES = """
 - name: Create a nasha partition with specified ACL and configure snapshot
-  synthesio.ovh.dedicated_nasha_manage_partition:
+  blastorios.ovh.dedicated_nasha_manage_partition:
     nas_service_name: "{{ nas_service_name }}"
     nas_partition_name: "{{ nas_partition_name }}"
     nas_partition_size: 10
@@ -105,11 +105,11 @@ import time
 
 from typing import Optional, List
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     OVHNASProtocolType,
     StatePresentAbsent,
 )

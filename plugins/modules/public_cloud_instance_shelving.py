@@ -31,14 +31,14 @@ options:
 
 EXAMPLES = r"""
 - name: Shelve the instance
-  synthesio.ovh.public_cloud_instance_shelving:
+  blastorios.ovh.public_cloud_instance_shelving:
     instance_id: "{{ instance_id }}"
     service_name: "{{ service_name }}"
     shelve_state: "shelved"
  delegate_to: localhost
 
 - name: Unshelve the instance
-  synthesio.ovh.public_cloud_instance_shelving:
+  blastorios.ovh.public_cloud_instance_shelving:
     instance_id: "{{ instance_id }}"
     service_name: "{{ service_name }}"
     shelve_state: "unshelved"
@@ -47,7 +47,7 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

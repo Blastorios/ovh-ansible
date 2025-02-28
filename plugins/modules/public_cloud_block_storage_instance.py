@@ -38,7 +38,7 @@ options:
 
 EXAMPLES = r"""
 - name: Ensure Volume is affected to instance
-  synthesio.ovh.public_cloud_block_storage_instance:
+  blastorios.ovh.public_cloud_block_storage_instance:
     service_name: "{{ service_name }}"
     volume_id: "{{ volume_id }}"
     instance_id: "{{ instance_id }}"
@@ -48,11 +48,11 @@ EXAMPLES = r"""
 
 RETURN = r""" # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
-from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
     StatePresentAbsent,
 )
 

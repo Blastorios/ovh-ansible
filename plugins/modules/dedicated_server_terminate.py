@@ -25,14 +25,14 @@ options:
 
 EXAMPLES = r"""
 - name: Terminate a dedicated server renting
-  synthesio.ovh.dedicated_server_terminate:
+  blastorios.ovh.dedicated_server_terminate:
     service_name: "{{ service_name }}"
   delegate_to: localhost
 """
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )

@@ -24,14 +24,14 @@ options:
 
 EXAMPLES = r"""
 - name: Retrieve all info for an OVH vps
-  synthesio.ovh.vps_info:
+  blastorios.ovh.vps_info:
     service_name: "{{ service_name }}"
   register: vps_info
 """
 
 RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
     OVH,
     collection_module,
 )
