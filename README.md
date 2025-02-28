@@ -1,9 +1,11 @@
-# Synthesio OVHCloud
+# OVHcloud Ansible Collection
 *An Ansible collection to talk with the OVH API.*
+
+This is a forked version from <https://github.com/synthesio/infra-ovh-ansible-module>, adding APIs beyond their company' scope.
 
 To install ([from git](https://docs.ansible.com/ansible/latest/user_guide/collections_using.html#installing-a-collection-from-a-git-repository)):
 ```shell
-ansible-galaxy collection install git+https://github.com/synthesio/infra-ovh-ansible-module
+ansible-galaxy collection install git+https://github.com/blastorios/ovh-ansible
 ```
 
 
@@ -13,7 +15,6 @@ This collection has been tested with the following software:
 
 - Python 3.9
 - [Python-ovh 1.0](https://github.com/ovh/python-ovh)
-- Ansible 2.12+
 
 Additionally, you need the following from OVHCloud:
 
@@ -47,7 +48,7 @@ Or, you can provide credentials as module attributes (this allows you to store t
 
 ```yaml
 - name: Add server to vrack
-  synthesio.ovh.dedicated_server_vrack:
+  blastorios.ovh.dedicated_server_vrack:
     endpoint: "ovh-eu"
     application_key: "<YOUR APPLICATION KEY>"
     application_secret: "<YOUR APPLICATIOM SECRET>"
@@ -61,14 +62,14 @@ Or, you can provide credentials as module attributes (this allows you to store t
 
 There is also an example to install a custom template on a dedicated server inside the `roles/ovhtemplate` directory.
 
-You can find additional examples in the provided documentation, using: `ansible-doc synthesio.ovh.$modules`.
+You can find additional examples in the provided documentation, using: `ansible-doc blastorios.ovh.$modules`.
 
 
 ### Add a host into the vrack
 
 ```yaml
 - name: Add server to vrack
-  synthesio.ovh.dedicated_server_vrack:
+  blastorios.ovh.dedicated_server_vrack:
     service_name: "{{ ovhname }}"
     vrack: "{{ vrackid }}"
 ```
@@ -77,7 +78,7 @@ You can find additional examples in the provided documentation, using: `ansible-
 
 ```yaml
 - name: Move IP to a given host
-  synthesio.ovh.ip_move:
+  blastorios.ovh.ip_move:
     service_name: "{{ ovhname }}"
     ip: "{{ ip }}"
 ```
@@ -87,7 +88,7 @@ You can find additional examples in the provided documentation, using: `ansible-
 
 ```yaml
 - name: Add server IP to DNS
-  synthesio.ovh.domain:
+  blastorios.ovh.domain:
     domain: "example.com"
     value: "192.0.2.1"
     record_type: "A"
@@ -101,13 +102,13 @@ You can find additional examples in the provided documentation, using: `ansible-
 
 ```yaml
 - name: Install new dedicated server
-  synthesio.ovh.dedicated_server_install:
+  blastorios.ovh.dedicated_server_install:
     service_name: "ns12345.ip-1-2-3.eu"
     hostname: "server01.example.net"
     template: "debian10_64"
 
 - name: Wait for the server installation
-  synthesio.ovh.dedicated_server_install_wait:
+  blastorios.ovh.dedicated_server_install_wait:
     service_name: "ns12345.ip-1-2-3.eu"
     max_retry: "240"
     sleep: "10"
@@ -117,7 +118,7 @@ You can find additional examples in the provided documentation, using: `ansible-
 
 ```yaml
 - name: Install new dedicated server
-  synthesio.ovh.dedicated_server_install:
+  blastorios.ovh.dedicated_server_install:
     service_name: "ns12345.ip-1-2-3.eu"
     hostname: "server01.example.net"
     template: "debian10_64"
@@ -129,7 +130,7 @@ You can find additional examples in the provided documentation, using: `ansible-
 
 ```yaml
 - name: run a public cloud installation
-  synthesio.ovh.public_cloud_instance:
+  blastorios.ovh.public_cloud_instance:
     name: "{{ inventory_hostname }}"
     ssh_key_id: "{{ ssh_key_id }}"
     service_name: "{{ service_name }}"
