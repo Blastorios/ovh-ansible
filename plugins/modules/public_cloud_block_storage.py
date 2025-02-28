@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = r'''
+DOCUMENTATION = r"""
 ---
 module: public_cloud_block_storage
 
@@ -52,9 +52,9 @@ options:
         default: present
         choices: ['present','absent']
         description: Indicate the desired state of volume
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Ensure Volume is state wanted
   synthesio.ovh.public_cloud_block_storage:
     service_name: "{{ service_name }}"
@@ -65,98 +65,116 @@ EXAMPLES = r'''
     volume_type: "{{ volume_type }}"
   delegate_to: localhost
   register: block_storage_metadata
-'''
+"""
 
-RETURN = r''' # '''
+RETURN = r""" # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from typing import Optional
+
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    StatePresentAbsent,
+    OVHVolumeType,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+@collection_module(
+    dict(
         service_name=dict(required=True),
         region=dict(required=True),
         size=dict(required=True, type="int"),
-        volume_type=dict(required=False, choices=['classic', 'high-speed', 'high-speed-gen2'], default='classic'),
+        volume_type=dict(
+            required=False,
+            choices=["classic", "high-speed", "high-speed-gen2"],
+            default="classic",
+        ),
         name=dict(required=True),
         description=dict(required=False),
         image_id=dict(required=False),
         snapshot_id=dict(required=False),
-        state=dict(choices=['present', 'absent'], default='present')
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        state=dict(choices=["present", "absent"], default="present"),
     )
-    client = OVH(module)
-
-    service_name = module.params['service_name']
-    region = module.params['region']
-    size = module.params['size']
-    volume_type = module.params['volume_type']
-    name = module.params['name']
-    description = module.params['description']
-    image_id = module.params['image_id']
-    snapshot_id = module.params['snapshot_id']
-    state = module.params['state']
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    region: str,
+    size: str,
+    volume_type: OVHVolumeType,
+    name: str,
+    description: Optional[str],
+    image_id: Optional[str],
+    snapshot_id: Optional[str],
+    state: StatePresentAbsent,
+):
     if module.check_mode:
-        module.exit_json(msg="Ensure volume {} is {} - (dry run mode)".format(name, state),
-                         changed=True)
+        module.exit_json(
+            msg="Ensure volume {} is {} - (dry run mode)".format(name, state),
+            changed=True,
+        )
 
     volume_list = []
-    volume_list = client.wrap_call("GET",
-                                   f"/cloud/project/{service_name}/volume",
-                                   region=region
-                                   )
+    volume_list = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/volume", region=region
+    )
 
     # Search if the volume exist. Consider you manage a strict nomenclature based on name.
     for volume in volume_list:
-        if volume['name'] == name:
-            volume_id = volume['id']
-            volume_details = client.wrap_call("GET", f"/cloud/project/{service_name}/volume/{volume_id}")
-            if state == 'absent':
-                _ = client.wrap_call("DELETE", f"/cloud/project/{service_name}/volume/{volume_id}")
+        if volume["name"] == name:
+            volume_id = volume["id"]
+            volume_details = client.wrap_call(
+                "GET", f"/cloud/project/{service_name}/volume/{volume_id}"
+            )
+            if state == "absent":
+                _ = client.wrap_call(
+                    "DELETE", f"/cloud/project/{service_name}/volume/{volume_id}"
+                )
                 module.exit_json(
                     msg="Volume {} ({}), has been deleted from cloud".format(
-                        name, volume_id),
-                    changed=True)
+                        name, volume_id
+                    ),
+                    changed=True,
+                )
 
             else:  # state == 'present':
                 module.exit_json(
                     msg="Volume {} ({}) has already been created on OVH public Cloud ".format(
-                        name, volume_id),
+                        name, volume_id
+                    ),
                     changed=False,
-                    **volume_details)
+                    **volume_details,
+                )
 
-    if state == 'present':
-        result = client.wrap_call("POST",
-                                  f"/cloud/project/{service_name}/volume",
-                                  description=description,
-                                  imageId=image_id,
-                                  name=name,
-                                  region=region,
-                                  size=size,
-                                  snapshotId=snapshot_id,
-                                  type=volume_type
-                                  )
+    if state == "present":
+        result = client.wrap_call(
+            "POST",
+            f"/cloud/project/{service_name}/volume",
+            description=description,
+            imageId=image_id,
+            name=name,
+            region=region,
+            size=size,
+            snapshotId=snapshot_id,
+            type=volume_type,
+        )
         module.exit_json(
             msg="Volume {} ({}), has been created on OVH public Cloud".format(
-                name, result['id']),
+                name, result["id"]
+            ),
             changed=True,
-            **result)
+            **result,
+        )
 
     else:  # state == 'absent'
         module.exit_json(
             msg="Volume {} doesn't exist on OVH public Cloud ".format(name),
-            changed=False)
+            changed=False,
+        )
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

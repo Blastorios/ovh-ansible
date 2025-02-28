@@ -50,7 +50,10 @@ RETURN = """ # """
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    OVHBootType,
 )
 
 
@@ -74,25 +77,23 @@ def build_boot_list(service_name: str, client: OVH) -> dict:
     return netboot
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            boot=dict(
-                required=True,
-                choices=["harddisk", "rescue-customer", "ipxe-shell", "poweroff"],
-            ),
-            force_reboot=dict(required=False, default=False, type="bool"),
-        )
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        boot=dict(
+            required=True,
+            choices=["harddisk", "rescue-customer", "ipxe-shell", "poweroff"],
+        ),
+        force_reboot=dict(required=False, default=False, type="bool"),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    service_name = module.params["service_name"]
-    boot = module.params["boot"]
-    force_reboot = module.params["force_reboot"]
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    boot: OVHBootType,
+    force_reboot: bool,
+):
     changed = False
 
     bootid = build_boot_list(service_name, client)
@@ -127,10 +128,6 @@ def run_module():
     module.exit_json(
         msg="{} is now set to boot on {}".format(service_name, boot), changed=changed
     )
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

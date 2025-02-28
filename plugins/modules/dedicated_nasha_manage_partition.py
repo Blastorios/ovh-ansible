@@ -101,8 +101,18 @@ changed:
 #    {atime: "off", recordsize: "131072", sync: "disabled"} // {atime: "on", recordsize: "131072", sync: "always"}
 # 1. manage changes in size, description or protocol
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
 import time
+
+from typing import Optional, List
+
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    OVHNASProtocolType,
+    StatePresentAbsent,
+)
 
 
 def wait_for_tasks_to_complete(client, storage, service, task_id, sleep, max_retry):
@@ -111,8 +121,7 @@ def wait_for_tasks_to_complete(client, storage, service, task_id, sleep, max_ret
     while waitForCompletion and i < float(max_retry):
         waitForCompletion = False
         task_info = client.wrap_call(
-            "GET",
-            f"/dedicated/{storage}/{service}/task/{task_id}"
+            "GET", f"/dedicated/{storage}/{service}/task/{task_id}"
         )
         if task_info["status"] != "done":
             waitForCompletion = True
@@ -125,38 +134,36 @@ def wait_for_tasks_to_complete(client, storage, service, task_id, sleep, max_ret
         i += 1
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            nas_service_name=dict(required=True),
-            nas_partition_name=dict(required=True),
-            nas_partition_description=dict(required=False),
-            nas_partition_size=dict(required=True),
-            nas_protocol=dict(required=True, choices=["NFS", "CIFS", "NFS_CIFS"]),
-            nas_partition_acl=dict(required=False, type="list", default=[]),
-            nas_partition_snapshot_type=dict(required=False, type="list", defaults=[]),
-            state=dict(required=False, default="present"),
-            max_retry=dict(required=False, default=120),
-            sleep=dict(required=False, default=5),
-        )
+@collection_module(
+    dict(
+        nas_service_name=dict(required=True),
+        nas_partition_name=dict(required=True),
+        nas_partition_description=dict(required=False),
+        nas_partition_size=dict(required=True),
+        nas_protocol=dict(required=True, choices=["NFS", "CIFS", "NFS_CIFS"]),
+        nas_partition_acl=dict(required=False, type="list", default=[]),
+        nas_partition_snapshot_type=dict(required=False, type="list", defaults=[]),
+        state=dict(required=False, default="present"),
+        max_retry=dict(required=False, default=120),
+        sleep=dict(required=False, default=5),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    nas_service_name = module.params["nas_service_name"]
-    nas_partition_name = module.params["nas_partition_name"]
-    nas_partition_description = module.params["nas_partition_description"]
-    nas_partition_size = module.params["nas_partition_size"]
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    nas_service_name: str,
+    nas_partition_name: str,
+    nas_partition_description: Optional[str],
+    nas_partition_size: str,
+    nas_protocol: OVHNASProtocolType,
+    nas_partition_acl: List[str],
+    nas_partition_snapshot_type: List[str],
+    state: StatePresentAbsent,
+    max_retry: str,
+    sleep: str,
+):
     if int(nas_partition_size) < 10:
         module.fail_json(msg="Partition size must be greater than or equal to 10 Gb.")
-    nas_protocol = module.params["nas_protocol"]
-    nas_partition_acl = module.params["nas_partition_acl"]
-    nas_partition_snapshot_type = module.params["nas_partition_snapshot_type"]
-    state = module.params["state"]
-    max_retry = module.params["max_retry"]
-    sleep = module.params["sleep"]
 
     # Message that will be sent at the end of execution
     final_message = ""
@@ -169,16 +176,12 @@ def run_module():
 
     # Check if zpool exist !
 
-    client.wrap_call(
-        "GET",
-        "/dedicated/nasha/{0}".format(nas_service_name)
-    )
+    client.wrap_call("GET", "/dedicated/nasha/{0}".format(nas_service_name))
 
     # Partitions of nas
 
     partitions = client.wrap_call(
-        "GET",
-        "/dedicated/nasha/{0}/partition".format(nas_service_name)
+        "GET", "/dedicated/nasha/{0}/partition".format(nas_service_name)
     )
 
     # If partition state is absent, we delete it and exit module execution
@@ -189,7 +192,7 @@ def run_module():
                 "DELETE",
                 "/dedicated/nasha/{0}/partition/{1}".format(
                     nas_service_name, nas_partition_name
-                )
+                ),
             )
 
         module.exit_json(
@@ -209,7 +212,7 @@ def run_module():
                 partitionDescription=nas_partition_description,
                 partitionName=nas_partition_name,
                 protocol=nas_protocol,
-                size=nas_partition_size
+                size=nas_partition_size,
             )
             wait_for_tasks_to_complete(
                 client, "nasha", nas_service_name, res["taskId"], sleep, max_retry
@@ -223,9 +226,7 @@ def run_module():
     # If partition state is present, and partition exist
     # TODO: manage changes in size, description or protocol
     elif state == "present" and nas_partition_name in partitions:
-        final_message = "Partition {0} is already created.\n".format(
-            nas_partition_name
-        )
+        final_message = "Partition {0} is already created.\n".format(nas_partition_name)
         partition_changed = False
 
     # If partition state is absent, and does not exists
@@ -251,17 +252,47 @@ def run_module():
             "GET",
             "/dedicated/nasha/{0}/partition/{1}/snapshot".format(
                 nas_service_name, nas_partition_name
-            )
+            ),
         )
 
         # Init nas_partition_snapshot matrix
         nas_partition_snapshot = [
-            {'type': 'day-1', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''},
-            {'type': 'day-2', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''},
-            {'type': 'day-3', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''},
-            {'type': 'day-7', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''},
-            {'type': 'hour-1', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''},
-            {'type': 'hour-6', 'current_state': 'unknown', 'wanted_state': 'unknown', 'action': ''}
+            {
+                "type": "day-1",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
+            {
+                "type": "day-2",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
+            {
+                "type": "day-3",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
+            {
+                "type": "day-7",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
+            {
+                "type": "hour-1",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
+            {
+                "type": "hour-6",
+                "current_state": "unknown",
+                "wanted_state": "unknown",
+                "action": "",
+            },
         ]
 
         res = []
@@ -283,10 +314,7 @@ def run_module():
             current_state = snapshot["current_state"]
             wanted_state = snapshot["wanted_state"]
 
-            if (
-                current_state == wanted_state
-                or wanted_state == "unknown"
-            ):
+            if current_state == wanted_state or wanted_state == "unknown":
                 snapshot["action"] = "unchanged"
             elif current_state == "present" and wanted_state == "absent":
                 snapshot["action"] = "delete"
@@ -303,12 +331,17 @@ def run_module():
                             nas_service_name,
                             nas_partition_name,
                             snapshot.get("type"),
-                        )
+                        ),
                     )
 
                     # Wait for tasks to complete
                     wait_for_tasks_to_complete(
-                        client, "nasha", nas_service_name, res["taskId"], sleep, max_retry
+                        client,
+                        "nasha",
+                        nas_service_name,
+                        res["taskId"],
+                        sleep,
+                        max_retry,
                     )
 
                 # Add snapshots
@@ -323,16 +356,21 @@ def run_module():
 
                     # Wait for tasks to complete
                     wait_for_tasks_to_complete(
-                        client, "nasha", nas_service_name, res["taskId"], sleep, max_retry
+                        client,
+                        "nasha",
+                        nas_service_name,
+                        res["taskId"],
+                        sleep,
+                        max_retry,
                     )
 
         nas_partition_snapshot_changed = [
-            (item.get('type'), item.get('action')) for item in nas_partition_snapshot if item.get('action') != 'unchanged'
+            (item.get("type"), item.get("action"))
+            for item in nas_partition_snapshot
+            if item.get("action") != "unchanged"
         ]
         if len(nas_partition_snapshot_changed) == 0:
-            final_message = (final_message
-                             + " No changes in snapshot configuration.\n"
-                             )
+            final_message = final_message + " No changes in snapshot configuration.\n"
         else:
             final_message = (
                 final_message
@@ -342,10 +380,7 @@ def run_module():
             )
             snapshot_changed = True
     else:
-        final_message = (
-            final_message
-            + " No snapshot specified.\n"
-        )
+        final_message = final_message + " No snapshot specified.\n"
 
     # ***************** ACL MANAGEMENT *****************
     if nas_partition_acl:
@@ -355,7 +390,7 @@ def run_module():
             "GET",
             "/dedicated/nasha/{0}/partition/{1}/access".format(
                 nas_service_name, nas_partition_name
-            )
+            ),
         )
 
         # Get existing ACL of each IP and populate a list of dict
@@ -363,8 +398,8 @@ def run_module():
             nas_partition_acl_existing_acl_properties = client.wrap_call(
                 "GET",
                 "/dedicated/nasha/{0}/partition/{1}/access/{2}".format(
-                    nas_service_name, nas_partition_name, quote(ip, safe='')
-                )
+                    nas_service_name, nas_partition_name, quote(ip, safe="")
+                ),
             )
             nas_partition_acl_existing.append(nas_partition_acl_existing_acl_properties)
 
@@ -374,11 +409,18 @@ def run_module():
             acl_wanted.setdefault("action", "unknow")
             if acl_wanted["state"] == "present":
                 acl_wanted.setdefault("type", "readwrite")
-            elif acl_wanted["state"] == "absent" and 'type' in acl_wanted:
+            elif acl_wanted["state"] == "absent" and "type" in acl_wanted:
                 del acl_wanted["type"]
 
         for acl_wanted in nas_partition_acl_wanted:
-            matching_acl = next((acl for acl in nas_partition_acl_existing if acl["ip"] == acl_wanted["ip"]), None)
+            matching_acl = next(
+                (
+                    acl
+                    for acl in nas_partition_acl_existing
+                    if acl["ip"] == acl_wanted["ip"]
+                ),
+                None,
+            )
             if matching_acl:
                 if "type" in acl_wanted:
                     if (
@@ -406,7 +448,6 @@ def run_module():
 
         # Executing actions on ACLs
         for acl_wanted in nas_partition_acl_wanted:
-
             if acl_wanted["action"] == "delete":
                 # Delete ACL on acl_wanted["ip"]
                 if not module.check_mode:
@@ -415,8 +456,8 @@ def run_module():
                         "/dedicated/nasha/{0}/partition/{1}/access/{2}".format(
                             nas_service_name,
                             nas_partition_name,
-                            quote(acl_wanted["ip"], safe=''),
-                        )
+                            quote(acl_wanted["ip"], safe=""),
+                        ),
                     )
 
                     wait_for_tasks_to_complete(
@@ -448,7 +489,11 @@ def run_module():
                         max_retry,
                     )
 
-        nas_partition_acl_changed = [(item.get('ip'), item.get('action')) for item in nas_partition_acl_wanted if item.get('action') != 'unchanged']
+        nas_partition_acl_changed = [
+            (item.get("ip"), item.get("action"))
+            for item in nas_partition_acl_wanted
+            if item.get("action") != "unchanged"
+        ]
         if len(nas_partition_acl_changed) == 0:
             final_message = final_message + " No changes in ACL configuration.\n"
         else:
@@ -457,10 +502,7 @@ def run_module():
             )
             acl_changed = True
     else:
-        final_message = (
-            final_message
-            + " No ACL specified.\n"
-        )
+        final_message = final_message + " No ACL specified.\n"
 
     if (
         ("acl_changed" in locals() and acl_changed)
@@ -472,15 +514,9 @@ def run_module():
         all_changed = False
 
     module.exit_json(
-        msg=final_message + "{0}\n".format(
-            DRY_RUN_MSG
-        ),
+        msg=final_message + "{0}\n".format(DRY_RUN_MSG),
         changed=all_changed,
     )
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

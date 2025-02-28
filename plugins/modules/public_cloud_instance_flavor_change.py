@@ -54,7 +54,7 @@ from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
 )
 
 
-def run_module():
+def main():
     module_args = ovh_argument_spec()
     module_args.update(
         dict(
@@ -83,9 +83,6 @@ def run_module():
         changed=True,
     )
 
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

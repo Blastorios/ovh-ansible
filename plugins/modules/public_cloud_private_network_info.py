@@ -52,27 +52,24 @@ openstack_id:
 
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
 )
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            private_network=dict(required=True),
-            region=dict(required=True),
-        )
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        private_network=dict(required=True),
+        region=dict(required=True),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    service_name = module.params["service_name"]
-    private_network = module.params["private_network"]
-    region = module.params["region"]
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    private_network: str,
+    region: str,
+):
     network_list = client.wrap_call(
         "GET", f"/cloud/project/{service_name}/network/private/{private_network}"
     )
@@ -82,10 +79,6 @@ def run_module():
             module.exit_json(changed=False, openstack_id=network["openstackId"])
 
     module.fail_json(msg=f"No network found for {region}", changed=False)
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":

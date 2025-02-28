@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: public_cloud_instance
 short_description: Manage OVH API for public cloud instance creation
@@ -58,9 +58,9 @@ options:
         description:
             - When you want force reinstallation of instance already existing
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: "Launch install of {{ inventory_hostname }} on public cloud OVH"
   synthesio.ovh.public_cloud_instance:
     name: "{{ inventory_hostname }}"
@@ -72,16 +72,20 @@ EXAMPLES = r'''
     image_id: "{{ image_id }}"
   delegate_to: localhost
   register: instance_metadata
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from typing import Optional, List
+
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+@collection_module(
+    dict(
         name=dict(required=True),
         flavor_id=dict(required=True),
         image_id=dict(required=True),
@@ -90,63 +94,63 @@ def run_module():
         region=dict(required=True),
         networks=dict(required=False, default=[], type="list"),
         monthly_billing=dict(required=False, default=False, type="bool"),
-        force_reinstall=dict(required=False, default=False, type="bool")
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        force_reinstall=dict(required=False, default=False, type="bool"),
     )
-    client = OVH(module)
-
-    name = module.params['name']
-    service_name = module.params['service_name']
-    flavor_id = module.params['flavor_id']
-    image_id = module.params['image_id']
-    ssh_key_id = module.params['ssh_key_id']
-    region = module.params['region']
-    networks = module.params['networks']
-    monthly_billing = module.params['monthly_billing']
-    force_reinstall = module.params['force_reinstall']
-
-    instances_list = client.wrap_call("GET",
-                                      f"/cloud/project/{service_name}/instance",
-                                      region=region)
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    name: str,
+    flavor_id: str,
+    image_id: str,
+    service_name: str,
+    ssh_key_id: Optional[str],
+    region: str,
+    networks: List[str],
+    monthly_billing: bool,
+    force_reinstall: bool,
+):
+    instances_list = client.wrap_call(
+        "GET", f"/cloud/project/{service_name}/instance", region=region
+    )
 
     for i in instances_list:
-
-        if i['name'] == name:
-            instance_id = i['id']
-            instance_details = client.wrap_call("GET", f"/cloud/project/{service_name}/instance/{instance_id}")
+        if i["name"] == name:
+            instance_id = i["id"]
+            instance_details = client.wrap_call(
+                "GET", f"/cloud/project/{service_name}/instance/{instance_id}"
+            )
 
             if force_reinstall:
                 reinstall_result = client.wrap_call(
                     "POST",
                     f"/cloud/project/{service_name}/instance/{instance_id}/reinstall",
-                    imageId=image_id)
+                    imageId=image_id,
+                )
                 module.exit_json(changed=True, **reinstall_result)
 
-            module.exit_json(changed=False,
-                             msg="Instance {} [{}] in region {} is already installed".format(name, instance_id, region),
-                             **instance_details)
+            module.exit_json(
+                changed=False,
+                msg="Instance {} [{}] in region {} is already installed".format(
+                    name, instance_id, region
+                ),
+                **instance_details,
+            )
 
-    result = client.wrap_call("POST",
-                              f"/cloud/project/{service_name}/instance",
-                              flavorId=flavor_id,
-                              imageId=image_id,
-                              monthlyBilling=monthly_billing,
-                              name=name,
-                              region=region,
-                              networks=networks,
-                              sshKeyId=ssh_key_id
-                              )
+    result = client.wrap_call(
+        "POST",
+        f"/cloud/project/{service_name}/instance",
+        flavorId=flavor_id,
+        imageId=image_id,
+        monthlyBilling=monthly_billing,
+        name=name,
+        region=region,
+        networks=networks,
+        sshKeyId=ssh_key_id,
+    )
 
     module.exit_json(changed=True, **result)
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

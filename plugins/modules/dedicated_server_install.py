@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: dedicated_server_install
 short_description: Install a new dedicated server
@@ -35,9 +36,9 @@ options:
         required: false
         description: enable (md) or disable (jbod) software raid
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Install a new dedicated server
   synthesio.ovh.dedicated_server_install:
     service_name: "ns12345.ip-1-2-3.eu"
@@ -50,61 +51,71 @@ EXAMPLES = r'''
         - key: sshKey
           value: "ssh-ed25519 AAAAC3 ..."
   delegate_to: localhost
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from typing import Optional, List
+
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    StateEnabledDisabled,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+@collection_module(
+    dict(
         service_name=dict(required=True),
         hostname=dict(required=True),
         template=dict(required=True),
         soft_raid_devices=dict(required=False, default=None),
         partition_scheme_name=dict(required=False, default="default"),
-        raid=dict(choices=['enabled', 'disabled'], default='enabled', required=False),
-        user_metadata=dict(type="list", requirements=False, default=None)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        raid=dict(choices=["enabled", "disabled"], default="enabled", required=False),
+        user_metadata=dict(type="list", requirements=False, default=None),
     )
-    client = OVH(module)
-
-    service_name = module.params['service_name']
-    hostname = module.params['hostname']
-    template = module.params['template']
-    soft_raid_devices = module.params['soft_raid_devices']
-    raid = module.params['raid']
-    partition_scheme_name = module.params['partition_scheme_name']
-    user_metadata = module.params['user_metadata']
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    hostname: str,
+    template: str,
+    soft_raid_devices: Optional[str],
+    partition_scheme_name: str,
+    raid: StateEnabledDisabled,
+    user_metadata: Optional[List],
+):
     if module.check_mode:
-        module.exit_json(msg=f"Installation in progress on {service_name} as {hostname} with template {template} - (dry run mode)",
-                         changed=True)
+        module.exit_json(
+            msg=f"Installation in progress on {service_name} as {hostname} with template {template} - (dry run mode)",
+            changed=True,
+        )
 
     compatible_templates = client.wrap_call(
-        "GET",
-        f"/dedicated/server/{service_name}/install/compatibleTemplates"
+        "GET", f"/dedicated/server/{service_name}/install/compatibleTemplates"
     )
-    if template not in compatible_templates["ovh"] and template not in compatible_templates["personal"]:
+    if (
+        template not in compatible_templates["ovh"]
+        and template not in compatible_templates["personal"]
+    ):
         module.fail_json(msg="f{template} doesn't exist in compatibles templates")
 
-    if raid == 'enabled':
+    if raid == "enabled":
         no_raid = False
-    elif raid == 'disabled':
+    elif raid == "disabled":
         no_raid = True
 
-    details = {"details":
-               {"language": "en",
-                "customHostname": hostname,
-                "softRaidDevices": soft_raid_devices,
-                "noRaid": no_raid}
-               }
+    details = {
+        "details": {
+            "language": "en",
+            "customHostname": hostname,
+            "softRaidDevices": soft_raid_devices,
+            "noRaid": no_raid,
+        }
+    }
 
     client.wrap_call(
         "POST",
@@ -115,12 +126,11 @@ def run_module():
         userMetadata=user_metadata,
     )
 
-    module.exit_json(msg=f"Installation in progress on {service_name} as {hostname} with template {template}!", changed=True)
+    module.exit_json(
+        msg=f"Installation in progress on {service_name} as {hostname} with template {template}!",
+        changed=True,
+    )
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

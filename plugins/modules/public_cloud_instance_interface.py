@@ -1,13 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
 __metaclass__ = type
 
-DOCUMENTATION = r'''
+DOCUMENTATION = r"""
 ---
 module: public_cloud_instance_interface
 
@@ -39,9 +39,9 @@ options:
         description:
             - The network's openstack id to attache the interface to
             - This is returned by a call to public_cloud_private_network_info.
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
   - name: Create vrack interface
   synthesio.ovh.public_cloud_instance_interface:
     service_name: "{{ service_name }}"
@@ -51,58 +51,62 @@ EXAMPLES = r'''
   delegate_to: localhost
   register: interface_metadata
 
-'''
+"""
 
-RETURN = r''' # '''
+RETURN = r""" # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    StatePresentAbsent,
+)
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+@collection_module(
+    dict(
         service_name=dict(required=True),
         instance_id=dict(required=True),
-        state=dict(choices=['present', 'absent'], default='present'),
+        state=dict(choices=["present", "absent"], default="present"),
         interface_ip=dict(required=True),
-        interface_openstack_id=dict(required=True)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        interface_openstack_id=dict(required=True),
     )
-    client = OVH(module)
-
-    service_name = module.params['service_name']
-    instance_id = module.params['instance_id']
-    state = module.params['state']
-    interface_ip = module.params['interface_ip']
-    interface_openstack_id = module.params['interface_openstack_id']
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    instance_id: str,
+    state: StatePresentAbsent,
+    interface_ip: str,
+    interface_openstack_id: str,
+):
     if module.check_mode:
-        module.exit_json(msg="Ensure interface {} on {} is {} on instance id {} - (dry run mode)"
-                         .format(interface_ip, interface_openstack_id, state, instance_id),
-                         changed=True)
+        module.exit_json(
+            msg="Ensure interface {} on {} is {} on instance id {} - (dry run mode)".format(
+                interface_ip, interface_openstack_id, state, instance_id
+            ),
+            changed=True,
+        )
 
-    if state == 'absent':
+    if state == "absent":
         # Need to get the interface id (via /cloud/project/{serviceName}/instance/{instanceId}/interface).
         # How to manage multiple interfaces ?
         module.fail_json(msg="Removing an interface is not yet implemented")
-    if state == 'present':
-        result = client.wrap_call("POST", f"/cloud/project/{service_name}/instance/{instance_id}/interface",
-                                  ip=interface_ip,
-                                  networkId=interface_openstack_id)
+    if state == "present":
+        result = client.wrap_call(
+            "POST",
+            f"/cloud/project/{service_name}/instance/{instance_id}/interface",
+            ip=interface_ip,
+            networkId=interface_openstack_id,
+        )
         module.exit_json(
             changed=True,
-            msg="Interface has been attached to instance id {}".format(
-                instance_id),
-            **result)
+            msg="Interface has been attached to instance id {}".format(instance_id),
+            **result,
+        )
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

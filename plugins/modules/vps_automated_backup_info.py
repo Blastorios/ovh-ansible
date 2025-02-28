@@ -3,17 +3,17 @@
 
 from __future__ import absolute_import, division, print_function
 
-from ansible.module_utils.basic import AnsibleModule
-
 __metaclass__ = type
+
+from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
-module: vps_info
-short_description: Retrieve all info for a OVH vps
+module: vps_automated_backup_info
+short_description: Retrieve the automated backup info for a OVH vps
 description:
-    - This module retrieves all info for a OVH vps
-author: Maxime Dupré / Paul Tap (armorica)
+    - This module retrieves the automated backup info for a OVH vps
+author: Blastorios
 requirements:
     - ovh >= 0.5.0
 options:
@@ -23,10 +23,10 @@ options:
 """
 
 EXAMPLES = r"""
-- name: Retrieve all info for an OVH vps
-  synthesio.ovh.vps_info:
+- name: Retrieve the automated backup settings for an OVH vps
+  synthesio.ovh.vps_automated_backup_info:
     service_name: "{{ service_name }}"
-  register: vps_info
+  register: vps_automated_backup_info
 """
 
 RETURN = """ # """
@@ -39,7 +39,7 @@ from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
 
 @collection_module(dict(service_name=dict(required=True)))
 def main(module: AnsibleModule, client: OVH, service_name: str):
-    result = client.wrap_call("GET", f"/vps/{service_name}")
+    result = client.wrap_call("GET", f"/vps/{service_name}/automatedBackup")
 
     module.exit_json(changed=False, **result)
 

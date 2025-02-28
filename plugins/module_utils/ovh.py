@@ -2,6 +2,11 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
+from functools import wraps
+from typing import Dict
+
+from ansible.module_utils.basic import AnsibleModule
+
 try:
     import ovh
     from ovh.exceptions import (
@@ -10,33 +15,19 @@ try:
         NotGrantedCall,
         BadParametersError,
         HTTPError,
-        ResourceNotFoundError
+        ResourceNotFoundError,
     )
 
     HAS_OVH = True
 except ImportError:
     HAS_OVH = False
 
-
-def ovh_argument_spec():
-    return dict(
-        endpoint=dict(type="str", required=False, default=None),
-        application_key=dict(type="str", required=False, default=None),
-        application_secret=dict(type="str", required=False, default=None),
-        consumer_key=dict(type="str", required=False, default=None),
-    )
-
-
-class OVHError(Exception):
-    pass
-
-
-class OVHResourceNotFound(Exception):
-    pass
+    class ResourceNotFoundError(Exception):
+        pass
 
 
 class OVH:
-    def __init__(self, module):
+    def __init__(self, module: AnsibleModule):
         self.module = module
 
         self._validate()
@@ -53,6 +44,8 @@ class OVH:
             self.client = ovh.Client()
 
     def _validate(self):
+        # TODO; This should not have to validate every single time.
+        # Simply assume python-ovh is installed.
         if not HAS_OVH:
             self.module.fail_json(msg="python-ovh must be installed to use this module")
 
@@ -67,14 +60,22 @@ class OVH:
             cred in self.module.params for cred in self.credentials
         ]
 
-    def wrap_call(self, verb: str, path: str, _need_auth: bool = True, **kwargs):
+    def wrap_call(self, verb: str, path: str, need_auth: bool = True, **kwargs):
         """
         Wrapper for the call to the api. Set kwargs using methods from the ovh module.
 
-        Args:
-            verb: http verb to use for the call.
-            path: API route to call.
-            _need_auth: If True, send authentication headers. This is the default.
+        Parameters
+        ----------
+        verb: str
+            http verb to use for the call.
+        path: str
+            API route to call.
+        need_auth: bool
+            If True, send authentication headers. This is the default.
+
+        Returns
+        -------
+        The API Call result.
         """
         # This is copied from the OVH python module
         # https://github.com/ovh/python-ovh/blob/master/ovh/client.py#L330
@@ -91,19 +92,83 @@ class OVH:
             kwargs = None
 
         try:
-            return self.client.call(verb, path, kwargs, _need_auth)
+            return self.client.call(verb, path, kwargs, need_auth)
 
-        except ResourceNotFoundError:
-            raise OVHResourceNotFound
         except InvalidKey as e:
+            self.module.fail_json(msg=f"Key {self.client._application_key}: {e}")
+        except (BadParametersError, NotGrantedCall, HTTPError, APIError) as e:
             self.module.fail_json(
-                msg=f"Key {self.client._application_key}: {e}"
+                msg=f"Fails calling API ({verb} {self.client._endpoint}{path}): {e}"
             )
-        except BadParametersError as e:
-            self.module.fail_json(msg=f"Fails calling API ({verb} {self.client._endpoint}{path}): {e}")
-        except NotGrantedCall as e:
-            self.module.fail_json(msg=f"Fails calling API ({verb} {self.client._endpoint}{path}): {e}")
-        except HTTPError as e:
-            self.module.fail_json(msg=f"Fails calling API ({verb} {self.client._endpoint}{path}): {e}")
-        except APIError as e:
-            self.module.fail_json(msg=f"Fails calling API ({verb} {self.client._endpoint}{path}): {e}")
+
+
+def ovh_argument_spec() -> Dict:
+    return dict(
+        endpoint=dict(type="str", required=False, default=None),
+        application_key=dict(type="str", required=False, default=None),
+        application_secret=dict(type="str", required=False, default=None),
+        consumer_key=dict(type="str", required=False, default=None),
+    )
+
+
+def collection_module(parameters: Dict, **kwargs):
+    """
+    The top-level decorator to create a new OVH Collection Module.
+
+    Both the AnsibleModule and OVH Client are invoked prior to the module
+    function call, passing the required module arguments to the wrapped
+    function.
+
+    Optionally, you can pass AnsibleModule arguments directly into the
+    decorator as they will be passed into the AnsibleModule construct.
+
+    Parameters
+    ----------
+    parameters: dict
+        A dictionary containing all module parameters.
+    **kwargs:
+        AnsibleModule parameters.
+
+    Returns
+    -------
+    decorator: callable
+        A wrapped module function with the required
+        AnsibleModule and OVH client code.
+
+    Raises
+    ------
+    TypeError
+        If the specified module arguments differ from
+        the function's input arguments.
+
+    Example
+    -------
+    ```python
+    from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+        OVH,
+        collection_module,
+    )
+    @collection_module(dict(service_name=dict(required=True)))
+    def main(module: AnsibleModule, client: OVH, service_name: str):
+        ...
+    ```
+    """
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            module_args = ovh_argument_spec()
+            module_args.update(parameters)
+
+            module = AnsibleModule(
+                argument_spec=module_args, supports_check_mode=True, **kwargs
+            )
+            client = OVH(module)
+
+            # Extract parameters and pass as arguments
+            params = {key: module.params[key] for key in parameters}
+            return func(module, client, **params)
+
+        return wrapper
+
+    return decorator

@@ -1,12 +1,13 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import (absolute_import, division, print_function)
+from __future__ import absolute_import, division, print_function
+
 __metaclass__ = type
 
 from ansible.module_utils.basic import AnsibleModule
 
-DOCUMENTATION = '''
+DOCUMENTATION = """
 ---
 module: dedicated_server_boot_wait
 short_description: Wait until the dedicated server hard reboot is done
@@ -29,67 +30,62 @@ options:
         description: Time to sleep between retries
         default: 10
 
-'''
+"""
 
-EXAMPLES = r'''
+EXAMPLES = r"""
 - name: Wait until the dedicated server hard reboot is done
   synthesio.ovh.dedicated_server_boot_wait:
     service_name: "ns12345.ip-1-2-3.eu"
     max_retry: "240"
     sleep: "10"
   delegate_to: localhost
-'''
+"""
 
-RETURN = ''' # '''
+RETURN = """ # """
 
-from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import OVH, ovh_argument_spec
 import time
 
+from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
+    OVH,
+    collection_module,
+)
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(dict(
+
+@collection_module(
+    dict(
         service_name=dict(required=True),
         max_retry=dict(required=False, default=240),
-        sleep=dict(required=False, default=10)
-    ))
-
-    module = AnsibleModule(
-        argument_spec=module_args,
-        supports_check_mode=True
+        sleep=dict(required=False, default=10),
     )
-    client = OVH(module)
-
-    service_name = module.params['service_name']
-    max_retry = module.params['max_retry']
-    sleep = module.params['sleep']
-
+)
+def main(
+    module: AnsibleModule, client: OVH, service_name: str, max_retry: str, sleep: str
+):
     if module.check_mode:
         module.exit_json(msg="done - (dry run mode)", changed=False)
 
     for i in range(1, int(max_retry)):
         tasklist = client.wrap_call(
-            "GET",
-            f"/dedicated/server/{service_name}/task",
-            function='hardReboot')
+            "GET", f"/dedicated/server/{service_name}/task", function="hardReboot"
+        )
         result = client.wrap_call(
-            "GET",
-            f"/dedicated/server/{service_name}/task/{max(tasklist)}")
+            "GET", f"/dedicated/server/{service_name}/task/{max(tasklist)}"
+        )
 
         message = ""
         # Get details in reboot progression
-        if "done" in result['status']:
-            module.exit_json(msg="{}: {}".format(result['status'], message), changed=False)
+        if "done" in result["status"]:
+            module.exit_json(
+                msg="{}: {}".format(result["status"], message), changed=False
+            )
         else:
-            message = result['status']
+            message = result["status"]
 
         time.sleep(float(sleep))
-    module.fail_json(msg="Max wait time reached, about %i x %i seconds" % (i, int(sleep)))
+    module.fail_json(
+        msg="Max wait time reached, about %i x %i seconds" % (i, int(sleep))
+    )
 
 
-def main():
-    run_module()
-
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

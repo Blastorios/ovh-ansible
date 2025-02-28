@@ -58,9 +58,15 @@ EXAMPLES = r"""
 
 RETURN = """ # """
 
+from typing import List
+
 from ansible_collections.synthesio.ovh.plugins.module_utils.ovh import (
     OVH,
-    ovh_argument_spec,
+    collection_module,
+)
+from ansible_collections.synthesio.ovh.plugins.module_utils.types import (
+    StatePresentAbsent,
+    OVHRecordType,
 )
 
 
@@ -100,53 +106,49 @@ def validate_record(existing_records, client, record_type, name, domain, value):
     return pre_message + message, changed
 
 
-def run_module():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            value=dict(required=True, type="list"),
-            name=dict(required=True),
-            domain=dict(required=True),
-            record_type=dict(
-                choices=[
-                    "A",
-                    "AAAA",
-                    "CAA",
-                    "CNAME",
-                    "DKIM",
-                    "DMARC",
-                    "DNAME",
-                    "LOC",
-                    "MX",
-                    "NAPTR",
-                    "NS",
-                    "PTR",
-                    "SPF",
-                    "SRV",
-                    "SSHFP",
-                    "TLSA",
-                    "TXT",
-                ],
-                default="A",
-            ),
-            state=dict(choices=["present", "absent"], default="present"),
-            record_ttl=dict(type="int", required=False, default=0),
-            append=dict(required=False, default=False, type="bool"),
-        )
+@collection_module(
+    dict(
+        value=dict(required=True, type="list"),
+        name=dict(required=True),
+        domain=dict(required=True),
+        record_type=dict(
+            choices=[
+                "A",
+                "AAAA",
+                "CAA",
+                "CNAME",
+                "DKIM",
+                "DMARC",
+                "DNAME",
+                "LOC",
+                "MX",
+                "NAPTR",
+                "NS",
+                "PTR",
+                "SPF",
+                "SRV",
+                "SSHFP",
+                "TLSA",
+                "TXT",
+            ],
+            default="A",
+        ),
+        state=dict(choices=["present", "absent"], default="present"),
+        record_ttl=dict(type="int", required=False, default=0),
+        append=dict(required=False, default=False, type="bool"),
     )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    value = module.params["value"]
-    domain = module.params["domain"]
-    name = module.params["name"]
-    record_type = module.params["record_type"]
-    state = module.params["state"]
-    append = module.params["append"]
-    record_ttl = module.params["record_ttl"]
-    changed = False
-
+)
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    value: List[str],
+    name: str,
+    domain: str,
+    record_type: OVHRecordType,
+    state: StatePresentAbsent,
+    record_ttl: int,
+    append: bool,
+):
     existing_records = client.wrap_call(
         "GET", f"/domain/zone/{domain}/record", fieldType=record_type, subDomain=name
     )
@@ -256,10 +258,6 @@ def run_module():
             msg=f"{', '.join(record_deleted)} deleted from record {name}.{domain}",
             changed=True,
         )
-
-
-def main():
-    run_module()
 
 
 if __name__ == "__main__":
