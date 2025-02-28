@@ -111,7 +111,7 @@ def ovh_argument_spec() -> Dict:
     )
 
 
-def collection_module(parameters: Dict, **kwargs):
+def collection_module(parameters: Dict, supports_check_mode: bool = True, **kwargs):
     """
     The top-level decorator to create a new OVH Collection Module.
 
@@ -161,7 +161,9 @@ def collection_module(parameters: Dict, **kwargs):
             module_args.update(parameters)
 
             module = AnsibleModule(
-                argument_spec=module_args, supports_check_mode=True, **kwargs
+                argument_spec=module_args,
+                supports_check_mode=supports_check_mode,
+                **kwargs,
             )
             client = OVH(module)
 
