@@ -1,13 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+    OVHVolumeType,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_block_storage
 
@@ -53,7 +65,6 @@ options:
         choices: ['present','absent']
         description: Indicate the desired state of volume
 """
-
 EXAMPLES = r"""
 - name: Ensure Volume is state wanted
   blastorios.ovh.public_cloud_block_storage:
@@ -66,19 +77,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: block_storage_metadata
 """
-
-RETURN = r""" # """
-
-from typing import Optional
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-    OVHVolumeType,
-)
+RETURN = """ # """
 
 
 @collection_module(
@@ -96,7 +95,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         image_id=dict(required=False),
         snapshot_id=dict(required=False),
         state=dict(choices=["present", "absent"], default="present"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -111,12 +111,6 @@ def main(
     snapshot_id: Optional[str],
     state: StatePresentAbsent,
 ):
-    if module.check_mode:
-        module.exit_json(
-            msg="Ensure volume {} is {} - (dry run mode)".format(name, state),
-            changed=True,
-        )
-
     volume_list = []
     volume_list = client.wrap_call(
         "GET", f"/cloud/project/{service_name}/volume", region=region

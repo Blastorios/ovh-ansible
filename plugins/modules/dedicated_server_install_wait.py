@@ -3,9 +3,18 @@
 
 from __future__ import absolute_import, division, print_function
 
-__metaclass__ = type
+from time import sleep as time_sleep
 
 from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
+__metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -31,7 +40,6 @@ options:
         default: 10
 
 """
-
 EXAMPLES = r"""
 - name: Wait until the dedicated server installation is done
   blastorios.ovh.dedicated_server_install_wait:
@@ -40,15 +48,7 @@ EXAMPLES = r"""
     sleep: "10"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-import time
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -56,14 +56,12 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         service_name=dict(required=True),
         max_retry=dict(required=False, default=240),
         sleep=dict(required=False, default=10),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, service_name: str, max_retry: str, sleep: str
 ):
-    if module.check_mode:
-        module.exit_json(msg="done - (dry run mode)", changed=False)
-
     for i in range(1, int(max_retry)):
         tasklist = client.wrap_call(
             "GET", f"/dedicated/server/{service_name}/task", function="reinstallServer"
@@ -92,7 +90,7 @@ def main(
             for progress in progress_status["progress"]:
                 if progress["status"] == "doing":
                     message = progress["comment"]
-        time.sleep(float(sleep))
+        time_sleep(float(sleep))
     module.fail_json(
         msg="Max wait time reached, about %i x %i seconds" % (i, int(sleep))
     )

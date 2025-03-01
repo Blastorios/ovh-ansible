@@ -1,13 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_instance_interface
 
@@ -40,7 +49,6 @@ options:
             - The network's openstack id to attache the interface to
             - This is returned by a call to public_cloud_private_network_info.
 """
-
 EXAMPLES = r"""
   - name: Create vrack interface
   blastorios.ovh.public_cloud_instance_interface:
@@ -52,16 +60,7 @@ EXAMPLES = r"""
   register: interface_metadata
 
 """
-
-RETURN = r""" # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
+RETURN = """ # """
 
 
 @collection_module(
@@ -71,7 +70,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         state=dict(choices=["present", "absent"], default="present"),
         interface_ip=dict(required=True),
         interface_openstack_id=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -82,14 +82,6 @@ def main(
     interface_ip: str,
     interface_openstack_id: str,
 ):
-    if module.check_mode:
-        module.exit_json(
-            msg="Ensure interface {} on {} is {} on instance id {} - (dry run mode)".format(
-                interface_ip, interface_openstack_id, state, instance_id
-            ),
-            changed=True,
-        )
-
     if state == "absent":
         # Need to get the interface id (via /cloud/project/{serviceName}/instance/{instanceId}/interface).
         # How to manage multiple interfaces ?

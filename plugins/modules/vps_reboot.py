@@ -3,9 +3,16 @@
 
 from __future__ import absolute_import, division, print_function
 
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -21,22 +28,15 @@ options:
         required: true
         description: The service name
 """
-
 EXAMPLES = r"""
 - name: Retrieve the automated backup settings for an OVH vps
   blastorios.ovh.vps_reboot:
     service_name: "{{ service_name }}"
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(service_name=dict(required=True)))
+@collection_module(dict(service_name=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, service_name: str):
     result: dict = client.wrap_call("POST", f"/vps/{service_name}/reboot")
 

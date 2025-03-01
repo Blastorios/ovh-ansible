@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -28,7 +34,6 @@ options:
         choices: ["shelved", "unshelved"]
         description: The shelved desired status
 """
-
 EXAMPLES = r"""
 - name: Shelve the instance
   blastorios.ovh.public_cloud_instance_shelving:
@@ -44,13 +49,7 @@ EXAMPLES = r"""
     shelve_state: "unshelved"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -58,7 +57,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         service_name=dict(required=True),
         shelve_state=dict(required=True, choices=["shelved", "unshelved"]),
         instance_id=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,

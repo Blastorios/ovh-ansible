@@ -1,11 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -27,7 +34,6 @@ options:
         required: true
         description: The flavor id
 """
-
 EXAMPLES = r"""
 - name: Get id for a flavor
   blastorios.ovh.public_cloud_flavorid_info:
@@ -45,32 +51,24 @@ EXAMPLES = r"""
   delegate_to: localhost
   when: flavor_infos.availability
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    ovh_argument_spec,
+
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        instance_id=dict(required=True),
+        flavor_id=dict(required=True),
+    ),
+    use_default_check_mode=True,
 )
-
-
-def main():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            instance_id=dict(required=True),
-            flavor_id=dict(required=True),
-        )
-    )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    service_name = module.params["service_name"]
-    flavor_id = module.params["flavor_id"]
-    instance_id = module.params["instance_id"]
-
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    service_name: str,
+    flavor_id: str,
+    instance_id: str,
+):
     # Do the call
     client.wrap_call(
         "POST",

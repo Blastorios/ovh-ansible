@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -25,7 +31,6 @@ options:
         description: The instance uuid
 
 """
-
 EXAMPLES = r"""
 - name: Retrieve all info for a OVH public cloud instance
   blastorios.ovh.public_cloud_instance_info:
@@ -34,17 +39,12 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: instance_metadata
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
-    dict(service_name=dict(required=True), instance_id=dict(required=True))
+    dict(service_name=dict(required=True), instance_id=dict(required=True)),
+    use_default_check_mode=True,
 )
 def main(module: AnsibleModule, client: OVH, service_name: str, instance_id: str):
     result = client.wrap_call(

@@ -1,9 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
+
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
+
 DOCUMENTATION = """
 ---
 module: dedicated_server_hardware_info
@@ -25,7 +34,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: hardware_info
 """
-RETURN = r"""
+RETURN = """
 bootMode:
     description: Server boot mode.
     returned: always
@@ -178,13 +187,8 @@ usbKeys:
             type: int
 """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(service_name=dict(required=True)))
+@collection_module(dict(service_name=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, service_name: str):
     result = client.wrap_call(
         "GET", f"/dedicated/server/{service_name}/specifications/hardware"

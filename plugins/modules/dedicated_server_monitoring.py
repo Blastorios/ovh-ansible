@@ -3,9 +3,19 @@
 
 from __future__ import absolute_import, division, print_function
 
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
+
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -28,7 +38,6 @@ options:
           - absent
 
 """
-
 EXAMPLES = r"""
 - name: "Enable monitoring on dedicated server {{ service_name }}"
   blastorios.ovh.dedicated_server_monitoring:
@@ -36,23 +45,15 @@ EXAMPLES = r"""
     state: "present"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
 
 
 @collection_module(
     dict(
         service_name=dict(required=True),
         state=dict(choices=["present", "absent"], default="present"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, service_name: str, state: StatePresentAbsent
@@ -61,14 +62,6 @@ def main(
         monitoring_bool = True
     elif state == "absent":
         monitoring_bool = False
-
-    if module.check_mode:
-        module.exit_json(
-            msg="Monitoring is now {} for {} - (dry run mode)".format(
-                state, service_name
-            ),
-            changed=True,
-        )
 
     server_state = client.wrap_call("GET", f"/dedicated/server/{service_name}")
 

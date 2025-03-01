@@ -1,11 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -24,28 +32,20 @@ options:
         required: false
         description: A Snapshot description
 """
-
 EXAMPLES = r"""
 - name: Retrieve the automated backup settings for an OVH vps
   blastorios.ovh.vps_create_snapshot:
     service_name: "{{ service_name }}"
     description: Quickly saving before I do something weird
 """
-
 RETURN = """ # """
-
-from typing import Optional
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
     dict(
         service_name=dict(required=True), description=dict(required=False, default=None)
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, service_name: str, description: Optional[str]

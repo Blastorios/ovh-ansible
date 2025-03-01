@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -29,7 +35,6 @@ options:
           - The region where the instance is deployed
 
 """
-
 EXAMPLES = r"""
 - name: Get the id of a OVH public cloud instance
   blastorios.ovh.public_cloud_instance_info:
@@ -39,37 +44,29 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: instance_id
 """
-
-RETURN = r"""
+RETURN = """
 id:
     description: Id of a public cloud instance
     type: str
     sample: kai1hei3-2aku-cz2h-pkc9-aapo1jeigh9e
 """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    ovh_argument_spec,
+
+@collection_module(
+    dict(
+        service_name=dict(required=True),
+        instance_name=dict(required=True),
+        region=dict(required=True),
+    ),
+    use_default_check_mode=True,
 )
-
-
-def main():
-    module_args = ovh_argument_spec()
-    module_args.update(
-        dict(
-            service_name=dict(required=True),
-            instance_name=dict(required=True),
-            region=dict(required=True),
-        )
-    )
-
-    module = AnsibleModule(argument_spec=module_args, supports_check_mode=True)
-    client = OVH(module)
-
-    instance_name = module.params["instance_name"]
-    service_name = module.params["service_name"]
-    region = module.params["region"]
-
+def main(
+    module: AnsibleModule,
+    client: OVH,
+    instance_name: str,
+    service_name: str,
+    region: str,
+):
     instance_id = False
 
     # Get instance id

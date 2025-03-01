@@ -1,13 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_object_storage
 
@@ -40,7 +49,6 @@ options:
         choices: ['true', 'false']
         description: When state is absent, force deletion of the S3 bucket even if not empty (up to 1000 objects deletion)
 """
-
 EXAMPLES = r"""
 - name: Ensure S3 bucket is in desired state
   blastorios.ovh.public_cloud_object_storage:
@@ -50,16 +58,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: object_storage_metadata
 """
-
-RETURN = r""" # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
+RETURN = """ # """
 
 
 @collection_module(
@@ -69,7 +68,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         name=dict(required=True),
         state=dict(choices=["present", "absent"], default="present"),
         force=dict(required=False, default=False, type="bool"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -81,13 +81,6 @@ def main(
     force: bool,
 ):
     """Create or delete an OVH public cloud S3 bucket"""
-
-    if module.check_mode:
-        module.exit_json(
-            msg="Ensure S3 bucket {} is {} - (dry run mode)".format(name, state),
-            changed=True,
-        )
-
     bucket_list = []
     bucket_list = client.wrap_call(
         "GET", f"/cloud/project/{service_name}/region/{region}/storage"

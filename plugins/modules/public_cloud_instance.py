@@ -1,11 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional, List
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -59,7 +67,6 @@ options:
             - When you want force reinstallation of instance already existing
 
 """
-
 EXAMPLES = r"""
 - name: "Launch install of {{ inventory_hostname }} on public cloud OVH"
   blastorios.ovh.public_cloud_instance:
@@ -73,15 +80,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: instance_metadata
 """
-
 RETURN = """ # """
-
-from typing import Optional, List
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -95,7 +94,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         networks=dict(required=False, default=[], type="list"),
         monthly_billing=dict(required=False, default=False, type="bool"),
         force_reinstall=dict(required=False, default=False, type="bool"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,

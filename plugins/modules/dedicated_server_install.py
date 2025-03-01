@@ -1,11 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional, List
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StateEnabledDisabled,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -37,7 +48,6 @@ options:
         description: enable (md) or disable (jbod) software raid
 
 """
-
 EXAMPLES = r"""
 - name: Install a new dedicated server
   blastorios.ovh.dedicated_server_install:
@@ -52,18 +62,7 @@ EXAMPLES = r"""
           value: "ssh-ed25519 AAAAC3 ..."
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from typing import Optional, List
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StateEnabledDisabled,
-)
 
 
 @collection_module(
@@ -75,7 +74,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         partition_scheme_name=dict(required=False, default="default"),
         raid=dict(choices=["enabled", "disabled"], default="enabled", required=False),
         user_metadata=dict(type="list", requirements=False, default=None),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -88,12 +88,6 @@ def main(
     raid: StateEnabledDisabled,
     user_metadata: Optional[List],
 ):
-    if module.check_mode:
-        module.exit_json(
-            msg=f"Installation in progress on {service_name} as {hostname} with template {template} - (dry run mode)",
-            changed=True,
-        )
-
     compatible_templates = client.wrap_call(
         "GET", f"/dedicated/server/{service_name}/install/compatibleTemplates"
     )

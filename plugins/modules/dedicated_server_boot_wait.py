@@ -45,7 +45,7 @@ RETURN = """ # """
 
 import time
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
+from ..module_utils.ovh import (
     OVH,
     collection_module,
 )
@@ -56,14 +56,12 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         service_name=dict(required=True),
         max_retry=dict(required=False, default=240),
         sleep=dict(required=False, default=10),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, service_name: str, max_retry: str, sleep: str
 ):
-    if module.check_mode:
-        module.exit_json(msg="done - (dry run mode)", changed=False)
-
     for i in range(1, int(max_retry)):
         tasklist = client.wrap_call(
             "GET", f"/dedicated/server/{service_name}/task", function="hardReboot"

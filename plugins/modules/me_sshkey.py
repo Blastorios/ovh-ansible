@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -21,7 +27,6 @@ options:
         required: true
         description: The ssh key name
 """
-
 EXAMPLES = r"""
 - name: Retrieve ssh key by name
   blastorios.ovh.me_sshkey:
@@ -35,16 +40,10 @@ EXAMPLES = r"""
     ssh_key: "{{ ssh_key.key }}"
   delegate_to: localhost
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(ssh_key_name=dict(required=True)))
+@collection_module(dict(ssh_key_name=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, ssh_key_name: str):
     result = client.wrap_call("GET", f"/me/sshKey/{ssh_key_name}")
 
