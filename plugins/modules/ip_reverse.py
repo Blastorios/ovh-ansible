@@ -1,11 +1,21 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional
+from urllib import parse
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    ResourceNotFound,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -29,7 +39,6 @@ options:
         default: None
 
 """
-
 EXAMPLES = r"""
 - name: Modify reverse on IP
   blastorios.ovh.ip_reverse:
@@ -37,17 +46,7 @@ EXAMPLES = r"""
     reverse: host.domain.example.
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from typing import Optional
-import urllib.parse
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    ResourceNotFound,
-    collection_module,
-)
 
 
 @collection_module(
@@ -55,7 +54,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         ip=dict(required=True),
         reverse=dict(required=True),
         ip_block=dict(required=False, default=None),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, ip: str, reverse: str, ip_block: Optional[str]
@@ -65,15 +65,7 @@ def main(
         ip_block = ip
     else:
         # url encode the ip mask (/26 -> %2F)
-        ip_block = urllib.parse.quote(ip_block, safe="")
-
-    if module.check_mode:
-        module.exit_json(
-            msg="Reverse {} to {} succesfully set ! - (dry run mode)".format(
-                ip, reverse
-            ),
-            changed=True,
-        )
+        ip_block = parse.quote(ip_block, safe="")
 
     result = {}
     try:

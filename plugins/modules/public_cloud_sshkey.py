@@ -1,11 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import Optional
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -34,7 +42,6 @@ options:
         description:
             - The service_name
 """
-
 EXAMPLES = r"""
 - name: "Create a new ssh key on public cloud OVH"
   blastorios.ovh.public_cloud_sshkey:
@@ -45,16 +52,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: sshkey_data
 """
-
 RETURN = """ # """
-
-
-from typing import Optional
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -63,7 +61,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         public_cloud_ssh_key=dict(required=True),
         region=dict(required=False, default=None),
         service_name=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,

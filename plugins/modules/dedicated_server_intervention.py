@@ -1,11 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StateEnabledDisabled,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -28,7 +37,6 @@ options:
           - disabled
 
 """
-
 EXAMPLES = r"""
 - name: "Enable proactive intervention on dedicated server {{ service_name }}"
   blastorios.ovh.dedicated_server_intervention:
@@ -36,23 +44,15 @@ EXAMPLES = r"""
     state: enabled
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StateEnabledDisabled,
-)
 
 
 @collection_module(
     dict(
         service_name=dict(required=True),
         state=dict(choices=["enabled", "disabled"], default="disabled"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule, client: OVH, service_name: str, state: StateEnabledDisabled
@@ -61,14 +61,6 @@ def main(
         no_intervention_bool = False
     elif state == "disabled":
         no_intervention_bool = True
-
-    if module.check_mode:
-        module.exit_json(
-            msg="NoIntervention is now {} for {} - (dry run mode)".format(
-                state, service_name
-            ),
-            changed=True,
-        )
 
     server_state = client.wrap_call("GET", f"/dedicated/server/{service_name}")
 

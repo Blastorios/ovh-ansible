@@ -1,12 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from time import sleep as time_sleep
+from typing import Optional, List
+from urllib.parse import quote
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    OVHNASProtocolType,
+    StatePresentAbsent,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
-from urllib.parse import quote
 
 DOCUMENTATION = """
 ---
@@ -62,8 +75,7 @@ options:
         description: Time to sleep between retries
         default: 5
 """
-
-EXAMPLES = """
+EXAMPLES = r"""
 - name: Create a nasha partition with specified ACL and configure snapshot
   blastorios.ovh.dedicated_nasha_manage_partition:
     nas_service_name: "{{ nas_service_name }}"
@@ -88,31 +100,18 @@ EXAMPLES = """
     sleep: 5
     max_retry: 120
 """
-
 RETURN = """
 changed:
     description: Indicates whether the module made any changes.
     type: bool
 """
 
+
 # TODO:
 # 1. Manage properties of NASHA : dedicated/nasha/{servicename} , monitored=True
 # 1. Manage option of partition : dedicated/nasha/{servicename}/partition/{partitionname}/options
 #    {atime: "off", recordsize: "131072", sync: "disabled"} // {atime: "on", recordsize: "131072", sync: "always"}
 # 1. manage changes in size, description or protocol
-
-import time
-
-from typing import Optional, List
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    OVHNASProtocolType,
-    StatePresentAbsent,
-)
 
 
 def wait_for_tasks_to_complete(client, storage, service, task_id, sleep, max_retry):
@@ -130,7 +129,7 @@ def wait_for_tasks_to_complete(client, storage, service, task_id, sleep, max_ret
             )
 
         if waitForCompletion:
-            time.sleep(float(sleep))
+            time_sleep(float(sleep))
         i += 1
 
 

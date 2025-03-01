@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -30,7 +36,6 @@ options:
         description: The service_name
 
 """
-
 EXAMPLES = r"""
 - name: Get image id
   blastorios.ovh.public_cloud_imageid_info:
@@ -40,13 +45,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: image_id
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -54,7 +53,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         service_name=dict(required=True),
         name=dict(required=True),
         region=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(module: AnsibleModule, client: OVH, service_name: str, name: str, region: str):
     # Get images list

@@ -1,11 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -32,7 +41,6 @@ options:
         description: Indicate the desired state of vrack
 
 """
-
 EXAMPLES = r"""
 - name: Change the vrack of a dedicated server
   blastorios.ovh.dedicated_server_vrack
@@ -40,16 +48,7 @@ EXAMPLES = r"""
     vrack: "{{ vrack }}"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
 
 
 @collection_module(
@@ -57,7 +56,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         service_name=dict(required=True),
         vrack=dict(required=True),
         state=dict(choices=["present", "absent"], default="present"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -66,14 +66,6 @@ def main(
     vrack: str,
     state: StatePresentAbsent,
 ):
-    if module.check_mode:
-        module.exit_json(
-            msg="{} succesfully {} on {} - (dry run mode)".format(
-                service_name, state, vrack
-            ),
-            changed=True,
-        )
-
     # There is no easy way to know if the server is
     # on an old or new network generation.
     # So we need to call this new route

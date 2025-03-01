@@ -1,13 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_private_network_info
 
@@ -30,7 +36,6 @@ options:
         required: true
         description: The region where to lookup for network
 """
-
 EXAMPLES = r"""
   - name: Get the openstack id for the private network in the region
   blastorios.ovh.public_cloud_private_network_info:
@@ -41,8 +46,7 @@ EXAMPLES = r"""
   register: network_info
 
 """
-
-RETURN = r"""
+RETURN = """
 openstack_id:
     description: Openstack alpha numeric identifier of the network
     returned: when matching region is found
@@ -50,18 +54,14 @@ openstack_id:
     sample: 54e97ee2-407c-4dbc-a833-39d2910514d4
 # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-
 
 @collection_module(
     dict(
         service_name=dict(required=True),
         private_network=dict(required=True),
         region=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,

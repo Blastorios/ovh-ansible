@@ -1,11 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from ast import literal_eval
+from os.path import basename
+from typing import Optional
+from yaml import safe_load
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -27,7 +41,6 @@ options:
         required: false
         description: The server name (used for hardware raid profils)
 """
-
 EXAMPLES = r"""
 - name: Manage installation templates for dedicated servers
   blastorios.ovh.installation_template:
@@ -35,22 +48,7 @@ EXAMPLES = r"""
     state: "present"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-import yaml
-import os
-import ast
-
-from typing import Optional
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
 
 
 @collection_module(
@@ -58,7 +56,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         template=dict(required=True),
         state=dict(choices=["present", "absent"], default="present"),
         service_name=dict(required=False, default=None),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -68,12 +67,7 @@ def main(
     service_name: Optional[str],
 ):
     # The action plugin resolve the "template" variable path. So we need to re-extract the basename
-    src_template = os.path.basename(template)
-
-    if module.check_mode:
-        module.exit_json(
-            msg="template {} is now {} - dry run mode".format(template, state)
-        )
+    src_template = basename(template)
 
     template_list = client.wrap_call("GET", "/me/installationTemplate")
 
@@ -94,7 +88,7 @@ def main(
 
     src = template
     with open(src, "r") as stream:
-        content = yaml.safe_load(stream)
+        content = safe_load(stream)
     conf = {}
     for i, j in content.items():
         conf[i] = j
@@ -184,7 +178,7 @@ def main(
 
     partition = {}
     for k in conf["partition"]:
-        partition = ast.literal_eval(k)
+        partition = literal_eval(k)
         if "volumeName" not in partition.keys():
             partition["volumeName"] = ""
         if "raid" in partition.keys():

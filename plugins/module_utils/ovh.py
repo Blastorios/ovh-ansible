@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 from functools import wraps
+from inspect import getfile
 from typing import Dict
 
 from ansible.module_utils.basic import AnsibleModule
@@ -111,7 +112,12 @@ def ovh_argument_spec() -> Dict:
     )
 
 
-def collection_module(parameters: Dict, supports_check_mode: bool = True, **kwargs):
+def collection_module(
+    parameters: Dict,
+    supports_check_mode: bool = True,
+    use_default_check_mode: bool = False,
+    **kwargs,
+):
     """
     The top-level decorator to create a new OVH Collection Module.
 
@@ -156,7 +162,7 @@ def collection_module(parameters: Dict, supports_check_mode: bool = True, **kwar
 
     def decorator(func):
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper():
             module_args = ovh_argument_spec()
             module_args.update(parameters)
 
@@ -169,6 +175,17 @@ def collection_module(parameters: Dict, supports_check_mode: bool = True, **kwar
 
             # Extract parameters and pass as arguments
             params = {key: module.params[key] for key in parameters}
+
+            if use_default_check_mode and module.check_mode:
+                module_path = getfile(func)
+                module_name = module_path.split("/")[-1].replace(".py", "")
+                parameter_string = ", ".join(
+                    [f"({key}): {value}" for key, value in params.items()]
+                )
+                module.exit_json(
+                    msg=f"(DRY RUN) Called .{module_name} using; {parameter_string}",
+                    changed=False,
+                )
             return func(module, client, **params)
 
         return wrapper

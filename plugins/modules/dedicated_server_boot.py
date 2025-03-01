@@ -1,11 +1,20 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    OVHBootType,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -36,7 +45,6 @@ choices: ['harddisk','rescue-customer','ipxe-shell','poweroff']
             - When you want to force a dedicated server reboot
 
 """
-
 EXAMPLES = r"""
 - name: Change the bootid of a dedicated server to rescue
   blastorios.ovh.dedicated_server_boot:
@@ -45,16 +53,7 @@ EXAMPLES = r"""
     force_reboot: "true"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    OVHBootType,
-)
 
 
 def build_boot_list(service_name: str, client: OVH) -> dict:
@@ -85,7 +84,8 @@ def build_boot_list(service_name: str, client: OVH) -> dict:
             choices=["harddisk", "rescue-customer", "ipxe-shell", "poweroff"],
         ),
         force_reboot=dict(required=False, default=False, type="bool"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -95,19 +95,12 @@ def main(
     force_reboot: bool,
 ):
     changed = False
-
     bootid = build_boot_list(service_name, client)
 
     if boot not in list(bootid.keys()):
         module.fail_json(
             msg=f"Fail, {boot} is not in the available option: {list(bootid.keys())}"
         )
-
-    if module.check_mode:
-        message = f"{service_name} is now set to boot on {boot}."
-        if force_reboot:
-            message = message + " Reboot asked."
-        module.exit_json(msg=f"{message} (dry run mode)")
 
     check = client.wrap_call("GET", f"/dedicated/server/{service_name}")
 

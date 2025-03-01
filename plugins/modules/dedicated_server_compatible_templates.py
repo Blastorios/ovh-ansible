@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -30,7 +36,7 @@ EXAMPLES = r"""
   register: dedicated_templates
 """
 
-RETURN = r"""
+RETURN = """
 compatible_templates:
     description: List of available templates for a the given host
     returned: always
@@ -48,20 +54,9 @@ compatible_templates:
     }
 """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(service_name=dict(required=True)))
+@collection_module(dict(service_name=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, service_name: str):
-    if module.check_mode:
-        module.exit_json(
-            msg=f"Retrieving templates for {service_name} - (dry run mode)",
-            changed=False,
-        )
-
     compatible_templates = client.wrap_call(
         "GET", f"/dedicated/server/{service_name}/install/compatibleTemplates"
     )

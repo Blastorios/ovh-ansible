@@ -1,9 +1,18 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, division, print_function
+
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
+
 DOCUMENTATION = """
 ---
 module: dedicated_server_network_info
@@ -25,7 +34,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: network_info
 """
-RETURN = r"""
+RETURN = """
 bandwidth:
     description: Bandwidth details.
     returned: always
@@ -236,17 +245,9 @@ vrack:
             sample: standard
 """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(service_name=dict(required=True)))
+@collection_module(dict(service_name=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, service_name: str):
-    if module.check_mode:
-        module.exit_json(changed=False)
-
     result = client.wrap_call(
         "GET", f"/dedicated/server/{service_name}/specifications/network"
     )

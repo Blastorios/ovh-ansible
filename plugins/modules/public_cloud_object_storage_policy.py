@@ -1,13 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    OVHPolicies,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_object_storage_policy
 
@@ -36,7 +45,6 @@ options:
         required: true
         description: Role associated to the user on this bucket
 """
-
 EXAMPLES = r"""
 - name: Add a read-only user to a S3 bucket
   blastorios.ovh.public_cloud_object_storage:
@@ -48,16 +56,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: object_storage_policy_metadata
 """
-
-RETURN = r""" # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    OVHPolicies,
-)
+RETURN = """ # """
 
 
 @collection_module(
@@ -67,7 +66,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         name=dict(required=True),
         user_name=dict(required=True),
         policy=dict(required=True, choices=["deny", "admin", "readOnly", "readWrite"]),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -79,14 +79,6 @@ def main(
     policy: OVHPolicies,
 ):
     """Apply a policy (user <-> role) to an OVH public cloud S3 bucket"""
-    if module.check_mode:
-        module.exit_json(
-            msg="Apply policy {} to user {} on S3 bucket {} ({}) - (dry run mode)".format(
-                policy, user_name, name, region
-            ),
-            changed=True,
-        )
-
     user_list = []
     user_list = client.wrap_call("GET", f"/cloud/project/{service_name}/user")
 

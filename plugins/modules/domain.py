@@ -1,13 +1,25 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from typing import List
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+    OVHRecordType,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: domain
 short_description: Manage record in DNS zone
@@ -45,7 +57,6 @@ options:
         description: Time To live for the given record
 
 """
-
 EXAMPLES = r"""
 - name: Ensure entry is in dns
   blastorios.ovh.domain:
@@ -55,19 +66,7 @@ EXAMPLES = r"""
     state: "present"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from typing import List
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-    OVHRecordType,
-)
 
 
 def validate_record(existing_records, client, record_type, name, domain, value):

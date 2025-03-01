@@ -1,11 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -25,7 +30,6 @@ options:
         description: The display name to set
 
 """
-
 EXAMPLES = r"""
 - name: "Set display name to {{ display_name }} on vps {{ ovhname }}"
   blastorios.ovh.vps_display_name:
@@ -33,27 +37,14 @@ EXAMPLES = r"""
     display_name: "{{ display_name }}"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
-    dict(display_name=dict(required=True), service_name=dict(required=True))
+    dict(display_name=dict(required=True), service_name=dict(required=True)),
+    use_default_check_mode=True,
 )
 def main(module: AnsibleModule, client: OVH, display_name: str, service_name: str):
-    if module.check_mode:
-        module.exit_json(
-            msg="display_name has been set to {} ! - (dry run mode)".format(
-                display_name
-            ),
-            changed=True,
-        )
-
     resource = {"displayName": display_name}
 
     # Endpoint /vps/{service_name} retrieves (among others) the current value for displayName

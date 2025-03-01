@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -31,8 +37,7 @@ options:
         description:
             - The region where the instance is deployed
 """
-
-EXAMPLES = """
+EXAMPLES = r"""
 - name: "Delete instance of {{ inventory_hostname }} on public cloud OVH"
   blastorios.ovh.public_cloud_instance_delete:
     name: "{{ inventory_hostname }}"
@@ -40,13 +45,7 @@ EXAMPLES = """
     region: "{{ region }}"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -54,7 +53,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
         name=dict(required=True),
         service_name=dict(required=True),
         region=dict(required=True),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(module: AnsibleModule, client: OVH, name: str, service_name: str, region: str):
     instances_list = client.wrap_call(

@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -21,7 +27,6 @@ options:
         required: true
         description: The ip
 """
-
 EXAMPLES = r"""
 - name: Get IP details
   blastorios.ovh.ip_info:
@@ -35,16 +40,10 @@ EXAMPLES = r"""
 - debug:
     msg: "{{ ip_info['isAdditionalIp'] }}"
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
-
-@collection_module(dict(ip=dict(required=True)))
+@collection_module(dict(ip=dict(required=True)), use_default_check_mode=True)
 def main(module: AnsibleModule, client: OVH, ip: str):
     result = client.wrap_call("GET", f"/ip/{ip}")
 

@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -25,7 +31,6 @@ options:
         description: The ssh public key string
 
 """
-
 EXAMPLES = r"""
 - name: "Set the ssh key for access in rescue mode {{ service_name }}"
   blastorios.ovh.dedicated_server_rescuesshkey:
@@ -33,23 +38,14 @@ EXAMPLES = r"""
     ssh_key: "ssh-ed25519 [....]"
   delegate_to: localhost
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
+
+@collection_module(
+    dict(service_name=dict(required=True), ssh_key=dict(required=True)),
+    use_default_check_mode=True,
 )
-
-
-@collection_module(dict(service_name=dict(required=True), ssh_key=dict(required=True)))
 def main(module: AnsibleModule, client: OVH, service_name: str, ssh_key: str):
-    if module.check_mode:
-        module.exit_json(
-            msg="Ssh key is set for {} - (dry run mode)".format(service_name),
-            changed=True,
-        )
-
     server_state = client.wrap_call("GET", f"/dedicated/server/{service_name}")
 
     if server_state["rescueSshKey"] == ssh_key:

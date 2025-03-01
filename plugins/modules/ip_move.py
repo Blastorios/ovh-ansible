@@ -1,11 +1,17 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
+
 __metaclass__ = type
+
 
 DOCUMENTATION = """
 ---
@@ -24,7 +30,6 @@ options:
         required: true
         description: The service_name
 """
-
 EXAMPLES = r"""
 - name: Modify reverse on IP
   blastorios.ovh.ip_move:
@@ -32,16 +37,13 @@ EXAMPLES = r"""
     service_name: "nsXXXXX.ip-YY-YYY-YYY.net"
   delegate_to: localhost
 """
-
 RETURN = """ # """
 
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
+
+@collection_module(
+    dict(ip=dict(required=True), service_name=dict(required=True)),
+    use_default_check_mode=True,
 )
-
-
-@collection_module(dict(ip=dict(required=True), service_name=dict(required=True)))
 def main(module: AnsibleModule, client: OVH, ip: str, service_name: str):
     result = {}
     result = client.wrap_call("GET", f"/ip/{ip}")
@@ -54,12 +56,6 @@ def main(module: AnsibleModule, client: OVH, ip: str, service_name: str):
     if current_service_name == service_name:
         module.exit_json(
             msg="{} already moved to {} !".format(ip, service_name), changed=False
-        )
-
-    if module.check_mode:
-        module.exit_json(
-            msg="Move {} to {} done ! - (dry run mode)".format(ip, service_name),
-            changed=True,
         )
 
     client.wrap_call("POST", f"/ip/{ip}/move", nexthop=None, to=service_name)

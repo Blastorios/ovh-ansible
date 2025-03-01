@@ -1,13 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
 
 from ansible.module_utils.basic import AnsibleModule
 
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+from ..module_utils.types import (
+    StatePresentAbsent,
+)
+
+
 __metaclass__ = type
 
-DOCUMENTATION = r"""
+
+DOCUMENTATION = """
 ---
 module: public_cloud_block_storage_instance
 
@@ -35,7 +44,6 @@ options:
         choices: ['present','absent']
         description: Indicate the desired state of volume
 """
-
 EXAMPLES = r"""
 - name: Ensure Volume is affected to instance
   blastorios.ovh.public_cloud_block_storage_instance:
@@ -45,16 +53,7 @@ EXAMPLES = r"""
   delegate_to: localhost
   register: block_storage_instance_metadata
 """
-
-RETURN = r""" # """
-
-from ansible_collections.blastorios.ovh.plugins.module_utils.ovh import (
-    OVH,
-    collection_module,
-)
-from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
-    StatePresentAbsent,
-)
+RETURN = """ # """
 
 
 @collection_module(
@@ -63,7 +62,8 @@ from ansible_collections.blastorios.ovh.plugins.module_utils.types import (
         instance_id=dict(required=True),
         volume_id=dict(required=True),
         state=dict(choices=["present", "absent"], default="present"),
-    )
+    ),
+    use_default_check_mode=True,
 )
 def main(
     module: AnsibleModule,
@@ -73,14 +73,6 @@ def main(
     volume_id: str,
     state: StatePresentAbsent,
 ):
-    if module.check_mode:
-        module.exit_json(
-            msg="Ensure volume id {} is {} on instance id {} - (dry run mode)".format(
-                volume_id, state, instance_id
-            ),
-            changed=True,
-        )
-
     volume_details = {}
     volume_details = client.wrap_call(
         "GET", f"/cloud/project/{service_name}/volume/{volume_id}"
