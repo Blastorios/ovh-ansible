@@ -1,11 +1,19 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-
 from __future__ import absolute_import, division, print_function
+
+from time import sleep as time_sleep
+
+from ansible.module_utils.basic import AnsibleModule
+
+from ..module_utils.ovh import (
+    OVH,
+    collection_module,
+)
+
 
 __metaclass__ = type
 
-from ansible.module_utils.basic import AnsibleModule
 
 DOCUMENTATION = """
 ---
@@ -31,7 +39,6 @@ options:
         default: 10
 
 """
-
 EXAMPLES = r"""
 - name: Wait until the dedicated server hard reboot is done
   blastorios.ovh.dedicated_server_boot_wait:
@@ -40,15 +47,7 @@ EXAMPLES = r"""
     sleep: "10"
   delegate_to: localhost
 """
-
 RETURN = """ # """
-
-import time
-
-from ..module_utils.ovh import (
-    OVH,
-    collection_module,
-)
 
 
 @collection_module(
@@ -79,7 +78,7 @@ def main(
         else:
             message = result["status"]
 
-        time.sleep(float(sleep))
+        time_sleep(float(sleep))
     module.fail_json(
         msg="Max wait time reached, about %i x %i seconds" % (i, int(sleep))
     )
