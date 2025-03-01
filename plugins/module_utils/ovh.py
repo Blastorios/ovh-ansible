@@ -179,11 +179,9 @@ def collection_module(
             if use_default_check_mode and module.check_mode:
                 module_path = getfile(func)
                 module_name = module_path.split("/")[-1].replace(".py", "")
-                parameter_string = ", ".join(
-                    [f"({key}): {value}" for key, value in params.items()]
-                )
                 module.exit_json(
-                    msg=f"(DRY RUN) Called .{module_name} using; {parameter_string}",
+                    msg=f"(DRY RUN) Called .{module_name} using the following parameters:",
+                    **params,
                     changed=False,
                 )
             return func(module, client, **params)
